@@ -10,7 +10,6 @@
     using AlterBankApi.Application.Requests;
     using AlterBankApi.Application.Responses;
     using Microsoft.Extensions.Logging;
-    using System.Runtime.InteropServices;
     using AlterBankApi.Extensions;
 
     [Route("api/v1/[controller]")]

@@ -7,6 +7,7 @@ namespace AlterBankApi
     using Microsoft.Extensions.Hosting;
     using Autofac;
     using AlterBankApi.Infrastructure;
+    using Microsoft.OpenApi.Models;
 
     public class Startup
     {
@@ -24,6 +25,11 @@ namespace AlterBankApi
             services
                 .AddControllers()
                 .AddNewtonsoftJson();
+            
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Alter bank API", Version = "v1" });
+            });
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
@@ -44,6 +50,12 @@ namespace AlterBankApi
             {
                 app.UseExceptionHandler("/Error");
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+               c.SwaggerEndpoint("/swagger/v1/swagger.json", "Alter bank API v1");
+            });
 
             app.UseRouting();
 
