@@ -10,18 +10,19 @@
     using AlterBankApi.Application.DataModel;
     using AlterBankApi.Application.Responses;
     using AlterBankApi.Infrastructure.Repositories;
+    using AlterBankApi.Infrastructure;
 
     public class AccountCommandHandler :
         IRequestHandler<OpenAccountCommand, OpenAccountResponse>,
         IRequestHandler<FundTransferCommand, FundTransferResponse>
     {
-        private readonly IAccountRepository _accountRepository;
+        private readonly IDatabaseConnectionFactory _dbConnectionFactory;
         private readonly ILogger<AccountCommandHandler> _logger;
 
-        public AccountCommandHandler(IAccountRepository repository, ILogger<AccountCommandHandler> logger)
+        public AccountCommandHandler(IDatabaseConnectionFactory dbCconnectionFactory, ILogger<AccountCommandHandler> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _accountRepository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _dbConnectionFactory = dbCconnectionFactory ?? throw new ArgumentNullException(nameof(dbCconnectionFactory));
         }
 
         public async Task<OpenAccountResponse> Handle(OpenAccountCommand request, CancellationToken cancellationToken)
@@ -33,7 +34,10 @@
                 Balance = request.Balance
             };
 
-            var result =  await _accountRepository.Create(account);
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var repository = new AccountRepository(connection);
+
+            var result =  await repository.Create(account);
 
             return new OpenAccountResponse(result.AccountNum);
         }
@@ -43,14 +47,14 @@
             bool transferSuccess = false;
             Account debitAccount;
             Account creditAccount;
-            //TODO implement resilency
-            /*
-                using var connection = await GetConnectionAsync();
-                using var transaction = connection.BeginTransaction();
-            */
 
-            debitAccount = await _accountRepository.ReadById(request.AccountNumDebit);
-            creditAccount = await _accountRepository.ReadById(request.AccountNumCredit);
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            using var transaction = connection.BeginTransaction();
+
+            var repository = new AccountRepository(connection, transaction);
+
+            debitAccount = await repository.ReadById(request.AccountNumDebit);
+            creditAccount = await repository.ReadById(request.AccountNumCredit);
 
             try
             {
@@ -58,16 +62,16 @@
 
                 if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
                 {
-                    debitAccount = await UpdateAccountBalance(debitAccount, transferAmount, true);
-                    creditAccount = await UpdateAccountBalance(creditAccount, transferAmount, false);
+                    debitAccount = await UpdateAccountBalance(repository, debitAccount, transferAmount, true);
+                    creditAccount = await UpdateAccountBalance(repository, creditAccount, transferAmount, false);
 
                     transferSuccess = true;
                 }
-                // transaction.Rollback();
+                transaction.Commit();
             }
             catch (DBConcurrencyException)
             {
-                // transaction.Abort();
+                transaction.Rollback();
                 _logger.LogWarning("Concurrency exception while fund transfer.");
             }
 
@@ -97,14 +101,14 @@
             return account.Balance + transferAmount;
         }
 
-        private async Task<Account> UpdateAccountBalance(Account account, decimal transferAmount, bool isDebitAccount)
+        private async Task<Account> UpdateAccountBalance(AccountRepository repository, Account account, decimal transferAmount, bool isDebitAccount)
         {
             if (isDebitAccount)
                 account.Balance = CalcDebitAmount(account, transferAmount);
             else
                 account.Balance = CalcCreditAmount(account, transferAmount);
 
-            return await _accountRepository.Update(account);
+            return await repository.Update(account);
         }
     }
 }

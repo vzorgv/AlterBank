@@ -9,24 +9,28 @@
     using Microsoft.Extensions.Logging;
     using AlterBankApi.Application.Requests;
     using AlterBankApi.Application.Responses;
+    using AlterBankApi.Infrastructure;
     using AlterBankApi.Infrastructure.Repositories;
 
     public class AccountRequestHandler :
         IRequestHandler<GetAccountRequest, GetAccountResponse>,
         IRequestHandler<GetListOfAccountsRequest, IEnumerable<GetAccountResponse>>
     {
+        private readonly IDatabaseConnectionFactory _dbConnectionFactory;
         private readonly ILogger<AccountRequestHandler> _logger;
-        private readonly IAccountRepository _accountRepository;
 
-        public AccountRequestHandler(IAccountRepository repository, ILogger<AccountRequestHandler> logger)
+        public AccountRequestHandler(IDatabaseConnectionFactory dbCconnectionFactory, ILogger<AccountRequestHandler> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _accountRepository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _dbConnectionFactory = dbCconnectionFactory ?? throw new ArgumentNullException(nameof(dbCconnectionFactory));
         }
 
         public async Task<IEnumerable<GetAccountResponse>> Handle(GetListOfAccountsRequest request, CancellationToken cancellationToken)
         {
-            var result = await _accountRepository.Read();
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var repository = new AccountRepository(connection);
+
+            var result = await repository.Read();
 
             return result
                 .Select(account => new GetAccountResponse(account))
@@ -35,7 +39,10 @@
 
         public async Task<GetAccountResponse> Handle(GetAccountRequest request, CancellationToken cancellationToken)
         {
-            var result =  await _accountRepository.ReadById(request.AccountNum);
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var repository = new AccountRepository(connection);
+
+            var result =  await repository.ReadById(request.AccountNum);
             return result == null ? null : new GetAccountResponse(result);
         }
     }

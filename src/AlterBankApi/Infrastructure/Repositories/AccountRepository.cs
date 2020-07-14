@@ -9,44 +9,48 @@
 
     public class AccountRepository : IAccountRepository
     {
-        private readonly IDatabaseConnectionFactory _databaseConnectionFactory;
+        private readonly IDbConnection _connection;
+        private readonly IDbTransaction _transaction;
 
-        public AccountRepository(IDatabaseConnectionFactory connectionFactory)
+        public AccountRepository(IDbConnection dbConnection, IDbTransaction dbTransaction)
         {
-            _databaseConnectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
+            _connection = dbConnection ?? throw new ArgumentNullException(nameof(dbConnection));
+            _transaction = dbTransaction;
         }
 
-        public AccountRepository(DatabaseContext databaseContext)
+        public AccountRepository(IDbConnection dbConnection) 
+            : this(dbConnection, null)
         {
-            _databaseConnectionFactory = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
         }
 
         public async Task<IEnumerable<Account>> Read()
         {
-            using var connection = await GetConnectionAsync();
-
-            return await connection.QueryAsync<Account>(@"SELECT * FROM AccountTable");
+            return await _connection.QueryAsync<Account>(@"SELECT * FROM AccountTable", transaction: _transaction);
         }
 
         public async Task<Account> ReadById(string accountNum)
         {
-            using var connection = await GetConnectionAsync();
-            return await GetAccount(accountNum, connection);
+            var accountSql = @"SELECT * FROM AccountTable WHERE AccountNum = @AccountNum";
+            return await _connection.QueryFirstOrDefaultAsync<Account>(accountSql, new { AccountNum = accountNum }, transaction: _transaction);
         }
 
         public async Task<Account> Create(Account account)
         {
+            if (account == null)
+                throw new ArgumentNullException(nameof(account));
+
             var sql = @"INSERT INTO AccountTable (AccountNum, CurrencyIsoCode, Balance)
                 OUTPUT inserted.*
                 VALUES (@AccountNum, @CurrencyIsoCode, @Balance)";
 
-            using var connection = await GetConnectionAsync();
-
-            return await connection.QueryFirstOrDefaultAsync<Account>(sql, param: new { AccountNum = account.AccountNum, CurrencyIsoCode = account.CurrencyIsoCode, Balance = account.Balance });
+            return await _connection.QueryFirstOrDefaultAsync<Account>(sql, param: new { AccountNum = account.AccountNum, CurrencyIsoCode = account.CurrencyIsoCode, Balance = account.Balance }, transaction: _transaction);
         }
 
         public async Task<Account> Update(Account account)
         {
+            if (account == null)
+                throw new ArgumentNullException(nameof(account));
+
             if (account.RowVersion == null)
                 throw new ArgumentNullException("RowVersion");
 
@@ -58,8 +62,6 @@
                         WHERE AccountNum = @AccountNum
                         AND   RowVersion = @RowVersion";
 
-            using var connection = await GetConnectionAsync();
-
             var parms = new
             {
                 AccountNum = account.AccountNum,
@@ -68,28 +70,12 @@
                 RowVersion = account.RowVersion
             };
 
-            var result = await connection.QueryFirstOrDefaultAsync<Account>(sql, param: parms);
+            var result = await _connection.QueryFirstOrDefaultAsync<Account>(sql, param: parms, transaction: _transaction);
 
             if (result == null)
                 throw new DBConcurrencyException($"The account {account.AccountNum} you are trying to edit has changed.");
-            
+
             return result;
-        }
-
-        private async Task<Account> GetAccount(string accountNum, IDbConnection connection, IDbTransaction transaction)
-        {
-            var accountSql = @"SELECT * FROM AccountTable WHERE AccountNum = @AccountNum";
-            return await connection.QueryFirstOrDefaultAsync<Account>(accountSql, new { AccountNum = accountNum }, transaction: transaction);
-        }
-
-        private async Task<Account> GetAccount(string accountNum, IDbConnection connection)
-        {
-            return await GetAccount(accountNum, connection, null);
-        }
-
-        private async Task<IDbConnection> GetConnectionAsync()
-        {
-            return await _databaseConnectionFactory.CreateConnectionAsync();
         }
     }
 }
