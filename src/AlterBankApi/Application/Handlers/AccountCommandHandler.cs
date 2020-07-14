@@ -49,7 +49,7 @@
             Account creditAccount;
 
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-            using var transaction = connection.BeginTransaction();
+            using var transaction = connection.BeginTransaction(IsolationLevel.Snapshot);
 
             var repository = new AccountRepository(connection, transaction);
 
