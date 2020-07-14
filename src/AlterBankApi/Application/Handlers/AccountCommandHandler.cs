@@ -74,6 +74,12 @@
                 transaction.Rollback();
                 _logger.LogWarning("Concurrency exception while fund transfer.");
             }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                _logger.LogError(ex, "ex here");
+                return null;
+            }
 
             return new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance, 
                 debitAccount.AccountNum, debitAccount.Balance,
