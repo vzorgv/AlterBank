@@ -77,7 +77,7 @@
             catch (Exception ex)
             {
                 transaction.Rollback();
-                _logger.LogError(ex, "ex here");
+                _logger.LogError(ex, "Fund transfer error.");
                 return null;
             }
 
