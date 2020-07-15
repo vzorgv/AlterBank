@@ -32,7 +32,6 @@
             var account = new Account
             {
                 AccountNum = request.AccountNum,
-                CurrencyIsoCode = request.CurrencyIsoCode,
                 Balance = request.Balance
             };
 
@@ -127,7 +126,7 @@
             if (CalcDebitAmount(accountDebit, transferAmount) < 0)
                 return false;
 
-            if (accountCredit.CurrencyIsoCode != accountDebit.CurrencyIsoCode)
+            if (accountCredit.AccountNum == accountDebit.AccountNum)
                 return false;
 
             return true;

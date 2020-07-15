@@ -6,13 +6,11 @@
     public sealed class OpenAccountCommand : IRequest<OpenAccountResponse>
     {
         public string AccountNum { get; }
-        public string CurrencyIsoCode { get; }
         public decimal Balance { get; }
 
-        public OpenAccountCommand(string accountNum, string currencyIsoCode, decimal balance)
+        public OpenAccountCommand(string accountNum, decimal balance)
         {
             AccountNum = accountNum;
-            CurrencyIsoCode = currencyIsoCode;
             Balance = balance;
         }
     }

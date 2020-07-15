@@ -39,11 +39,11 @@
             if (account == null)
                 throw new ArgumentNullException(nameof(account));
 
-            var sql = @"INSERT INTO AccountTable (AccountNum, CurrencyIsoCode, Balance)
+            var sql = @"INSERT INTO AccountTable (AccountNum, Balance)
                 OUTPUT inserted.*
-                VALUES (@AccountNum, @CurrencyIsoCode, @Balance)";
+                VALUES (@AccountNum, @Balance)";
 
-            return await _connection.QueryFirstOrDefaultAsync<Account>(sql, param: new { AccountNum = account.AccountNum, CurrencyIsoCode = account.CurrencyIsoCode, Balance = account.Balance }, transaction: _transaction);
+            return await _connection.QueryFirstOrDefaultAsync<Account>(sql, param: new { AccountNum = account.AccountNum, Balance = account.Balance }, transaction: _transaction);
         }
 
         public async Task<Account> Update(Account account)
@@ -56,8 +56,7 @@
 
             var sql = @"UPDATE AccountTable 
                         SET AccountNum      = @AccountNum,
-                            Balance         = @Balance,
-                            CurrencyIsoCode = @CurrencyIsoCode
+                            Balance         = @Balance
                         OUTPUT inserted.*
                         WHERE AccountNum = @AccountNum
                         AND   RowVersion = @RowVersion";
@@ -65,7 +64,6 @@
             var parms = new
             {
                 AccountNum = account.AccountNum,
-                CurrencyIsoCode = account.CurrencyIsoCode,
                 Balance = account.Balance,
                 RowVersion = account.RowVersion
             };
