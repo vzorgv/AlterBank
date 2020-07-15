@@ -14,6 +14,7 @@
     using AlterBankApi.Infrastructure;
     using AlterBankApi.Infrastructure.Repositories;
     using System.Data.Common;
+    using Dapper;
 
     /// <summary>
     /// Handles commands which midify account state
@@ -75,47 +76,51 @@
             IDbConnection connection;
             IDbTransaction transaction;
 
-            //TODO review delay
-            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromMilliseconds(10), retryCount: 3, fastFirst: false);
+            //TODO consider to use random 
+            //var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromMilliseconds(10), retryCount: 3, fastFirst: false);
 
-            var retryPolicy = Policy
-                .Handle<DbException>()
-                .WaitAndRetryAsync(delay);
+            //var retryPolicy = Policy
+            //    .Handle<DBConcurrencyException>()
+            //    .WaitAndRetryAsync(delay);
 
-            return await retryPolicy.ExecuteAsync(async () =>
+            //return await retryPolicy.ExecuteAsync(async () =>
             {
                 using (connection = await _dbConnectionFactory.CreateConnectionAsync())
                 {
-                    using (transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted))
+                    using (transaction = connection.BeginTransaction(IsolationLevel.Snapshot))
                     {
                         var repository = new AccountRepository(connection, transaction);
 
                         debitAccount = await repository.ReadById(request.AccountNumDebit);
                         creditAccount = await repository.ReadById(request.AccountNumCredit);
-
-                        var transferAmount = request.Amount;
-
-                        if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
+                        
+                        if (debitAccount != null && creditAccount != null)
                         {
-                            //TODO parallel them
-                            debitAccount = await UpdateAccountBalance(repository, debitAccount, transferAmount, true);
-                            if (debitAccount != null)
-                            creditAccount = await UpdateAccountBalance(repository, creditAccount, transferAmount, false);
-                                
-                        if (creditAccount != null && debitAccount != null)
-                            transferSuccess = true;
+                            var transferAmount = request.Amount;
+
+                            if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
+                            {
+                                debitAccount.Balance = CalcBalanceDebit(debitAccount, transferAmount);
+                                creditAccount.Balance = CalcBalnceCredit(creditAccount, transferAmount);
+
+                                await repository.UpdateBalancePair(creditAccount, debitAccount);
+
+                                transferSuccess = true;
+                            }
                         }
                         transaction.Commit();
                     }
                 }
 
+                //TODO refactoring return value
                 if (creditAccount == null || debitAccount == null)
                     return null;
                 else
                     return new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
                         debitAccount.AccountNum, debitAccount.Balance,
                         transferSuccess);
-            });
+            }
+            //);
         }
 
         private bool IsTransferAllowed(Account accountDebit, Account accountCredit, decimal transferAmount)
@@ -126,30 +131,20 @@
             if (transferAmount == decimal.Zero)
                 return false;
 
-            if (CalcDebitAmount(accountDebit, transferAmount) < 0)
+            if (CalcBalanceDebit(accountDebit, transferAmount) < 0)
                 return false;
 
             return true;
         }
 
-        private decimal CalcDebitAmount(Account account, decimal transferAmount)
+        private decimal CalcBalanceDebit(Account account, decimal transferAmount)
         {
             return account.Balance - transferAmount;
         }
 
-        private decimal CalcCreditAmount(Account account, decimal transferAmount)
+        private decimal CalcBalnceCredit(Account account, decimal transferAmount)
         {
             return account.Balance + transferAmount;
-        }
-
-        private async Task<Account> UpdateAccountBalance(AccountRepository repository, Account account, decimal transferAmount, bool isDebitAccount)
-        {
-            if (isDebitAccount)
-                account.Balance = CalcDebitAmount(account, transferAmount);
-            else
-                account.Balance = CalcCreditAmount(account, transferAmount);
-
-            return await repository.Update(account);
         }
     }
 }

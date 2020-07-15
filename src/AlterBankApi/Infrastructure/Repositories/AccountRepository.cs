@@ -68,5 +68,18 @@
 
             return await _connection.QueryFirstOrDefaultAsync<Account>(sql, param: parms, transaction: _transaction);
         }
+
+        public async Task UpdateBalancePair(Account accountCredit, Account accountDebit)
+        {
+            var parms = new
+            {
+                nvc_AccountCredit = accountCredit.AccountNum,
+                dcml_BalanceCredit = accountCredit.Balance,
+                nvc_AccountDebit = accountDebit.AccountNum,
+                dcml_BalanceDebit = accountDebit.Balance
+            };
+
+            await _connection.ExecuteAsync("UpdateBalancePair", param: parms, transaction: _transaction, commandType: CommandType.StoredProcedure);
+        }
     }
 }

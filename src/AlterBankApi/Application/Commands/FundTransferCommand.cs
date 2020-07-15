@@ -14,7 +14,7 @@
         /// </summary>
         [Required]
         [MinLength(1)]
-        [MaxLength(20)]
+        [MaxLength(10)]
         public string AccountNumDebit { get; }
 
         /// <summary>
@@ -22,13 +22,12 @@
         /// </summary>
         [Required]
         [MinLength(1)]
-        [MaxLength(20)]
+        [MaxLength(10)]
         public string AccountNumCredit { get; }
 
         /// <summary>
         /// Transfer amount
         /// </summary>
-        [Required]
         public decimal Amount { get; }
 
         /// <summary>
