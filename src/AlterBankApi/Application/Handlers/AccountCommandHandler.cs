@@ -14,6 +14,9 @@
     using AlterBankApi.Infrastructure;
     using AlterBankApi.Infrastructure.Repositories;
 
+    /// <summary>
+    /// Handles command which midified account state
+    /// </summary>
     public class AccountCommandHandler :
         IRequestHandler<OpenAccountCommand, OpenAccountResponse>,
         IRequestHandler<FundTransferCommand, FundTransferResponse>
@@ -21,12 +24,23 @@
         private readonly IDatabaseConnectionFactory _dbConnectionFactory;
         private readonly ILogger<AccountCommandHandler> _logger;
 
+        /// <summary>
+        /// Constructs class instance
+        /// </summary>
+        /// <param name="dbCconnectionFactory">Connection factory</param>
+        /// <param name="logger">Logger instance</param>
         public AccountCommandHandler(IDatabaseConnectionFactory dbCconnectionFactory, ILogger<AccountCommandHandler> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dbConnectionFactory = dbCconnectionFactory ?? throw new ArgumentNullException(nameof(dbCconnectionFactory));
         }
 
+        /// <summary>
+        /// Handles <c>OpenAccountCommand</c> command
+        /// </summary>
+        /// <param name="request">The command</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result of command execution as <c>OpenAccountResponse</c> instance</returns>
         public async Task<OpenAccountResponse> Handle(OpenAccountCommand request, CancellationToken cancellationToken)
         {
             var account = new Account
@@ -70,7 +84,12 @@
             return await Transfer(request, cancellationToken);
         }
     */
-
+        /// <summary>
+        /// Handles <c>FundTransferCommand</c> command
+        /// </summary>
+        /// <param name="request">The command</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Result of command execution as <c>FundTransferResponse</c> instance</returns>
         public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
         {
             bool transferSuccess = false;

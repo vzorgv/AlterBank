@@ -34,9 +34,9 @@
         /// <summary>
         /// Constructs class instance
         /// </summary>
-        /// <param name="accountNumCredit"></param>
-        /// <param name="accountNumDebit"></param>
-        /// <param name="amount"></param>
+        /// <param name="accountNumCredit">The account to be deposited</param>
+        /// <param name="accountNumDebit">The account to be withdrew</param>
+        /// <param name="amount">Transfer amount</param>
         public FundTransferCommand(string accountNumCredit, string accountNumDebit, decimal amount)
         {
             AccountNumDebit = accountNumDebit;
