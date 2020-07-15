@@ -15,6 +15,7 @@
     using AlterBankApi.Infrastructure.Repositories;
     using System.Data.Common;
     using Dapper;
+    using System.Data.SqlClient;
 
     /// <summary>
     /// Handles commands which midify account state
@@ -84,6 +85,7 @@
             //    .WaitAndRetryAsync(delay);
 
             //return await retryPolicy.ExecuteAsync(async () =>
+            try
             {
                 using (connection = await _dbConnectionFactory.CreateConnectionAsync())
                 {
@@ -93,7 +95,7 @@
 
                         debitAccount = await repository.ReadById(request.AccountNumDebit);
                         creditAccount = await repository.ReadById(request.AccountNumCredit);
-                        
+
                         if (debitAccount != null && creditAccount != null)
                         {
                             var transferAmount = request.Amount;
@@ -102,7 +104,7 @@
                             {
                                 debitAccount.Balance = CalcBalanceDebit(debitAccount, transferAmount);
                                 creditAccount.Balance = CalcBalnceCredit(creditAccount, transferAmount);
-
+                                
                                 await repository.UpdateBalancePair(creditAccount, debitAccount);
 
                                 transferSuccess = true;
@@ -111,16 +113,21 @@
                         transaction.Commit();
                     }
                 }
+            }
+            catch (SqlException ex)
+            {
+                // TODO extract to method
+                if (ex.Number != 3960 && ex.State != 5)
+                    throw;
+            }
 
-                //TODO refactoring return value
-                if (creditAccount == null || debitAccount == null)
+            //TODO refactoring return value
+            if (creditAccount == null || debitAccount == null)
                     return null;
                 else
                     return new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
                         debitAccount.AccountNum, debitAccount.Balance,
                         transferSuccess);
-            }
-            //);
         }
 
         private bool IsTransferAllowed(Account accountDebit, Account accountCredit, decimal transferAmount)
