@@ -37,7 +37,7 @@
                 var connection = new SqlConnection(_connectionString);
                 await connection.OpenAsync();
 
-                _logger.LogInformation("Connection open");
+                //_logger.LogInformation("Connection open");
 
                 return connection;
             }

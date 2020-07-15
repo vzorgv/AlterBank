@@ -11,6 +11,7 @@
     using AlterBankApi.Application.Responses;
     using AlterBankApi.Infrastructure.Repositories;
     using AlterBankApi.Infrastructure;
+    using System.Data.SqlClient;
 
     public class AccountCommandHandler :
         IRequestHandler<OpenAccountCommand, OpenAccountResponse>,
@@ -45,45 +46,58 @@
         public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
         {
             bool transferSuccess = false;
-            Account debitAccount;
-            Account creditAccount;
+            Account debitAccount = null;
+            Account creditAccount = null;
 
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-            using var transaction = connection.BeginTransaction(IsolationLevel.Snapshot);
-
-            var repository = new AccountRepository(connection, transaction);
-
-            debitAccount = await repository.ReadById(request.AccountNumDebit);
-            creditAccount = await repository.ReadById(request.AccountNumCredit);
+            IDbConnection connection;
+            IDbTransaction transaction;
 
             try
             {
-                var transferAmount = request.Amount;
-
-                if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
+                using (connection = await _dbConnectionFactory.CreateConnectionAsync())
                 {
-                    debitAccount = await UpdateAccountBalance(repository, debitAccount, transferAmount, true);
-                    creditAccount = await UpdateAccountBalance(repository, creditAccount, transferAmount, false);
+                    using (transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted))
+                    {
 
-                    transferSuccess = true;
+                        var repository = new AccountRepository(connection, transaction);
+
+                        debitAccount = await repository.ReadById(request.AccountNumDebit);
+                        creditAccount = await repository.ReadById(request.AccountNumCredit);
+
+                        var transferAmount = request.Amount;
+
+                        if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
+                        {
+                            debitAccount = await UpdateAccountBalance(repository, debitAccount, transferAmount, true);
+                            creditAccount = await UpdateAccountBalance(repository, creditAccount, transferAmount, false);
+
+                            transferSuccess = true;
+                        }
+                        transaction.Commit();
+                    }
                 }
-                transaction.Commit();
             }
             catch (DBConcurrencyException)
             {
-                transaction.Rollback();
                 _logger.LogWarning("Concurrency exception while fund transfer.");
+            }
+            catch (SqlException ex)
+            {
+                //TODO add resilency
+                _logger.LogWarning(ex.Message);
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
                 _logger.LogError(ex, "Fund transfer error.");
-                return null;
+                throw;
             }
 
-            return new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance, 
-                debitAccount.AccountNum, debitAccount.Balance,
-                transferSuccess);
+            if (creditAccount == null || debitAccount == null)
+                return null;
+            else
+                return new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance, 
+                    debitAccount.AccountNum, debitAccount.Balance,
+                    transferSuccess);
         }
 
         private bool IsTransferAllowed(Account accountDebit, Account accountCredit, decimal transferAmount)
