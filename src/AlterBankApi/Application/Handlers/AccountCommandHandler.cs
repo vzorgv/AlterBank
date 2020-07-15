@@ -97,7 +97,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Fund transfer error.");
+                _logger.LogError(ex, "Fund transfer error due to databse error.");
                 throw;
             }
 
