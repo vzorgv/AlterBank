@@ -47,16 +47,31 @@
 
         public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
         {
-            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromMilliseconds(5), retryCount: 3, fastFirst: true);
+            //TODO performance degradation
+            /*
+            const int RetryCount = 2;
+            const int RetryDelayMs = 2;
+
+            FundTransferResponse ret = null;
+
+            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromMilliseconds(RetryDelayMs), retryCount: RetryCount, fastFirst: true);
 
             var retryPolicy = Policy
                 .Handle<DBConcurrencyException>()
                 .WaitAndRetryAsync(delay);
 
-            return await retryPolicy.ExecuteAsync(async () => await Transfer(request, cancellationToken));
+            try
+            {
+                ret = await retryPolicy.ExecuteAsync(async () => await Transfer(request, cancellationToken));
+            }
+            catch (DBConcurrencyException)
+            {
+            }
+            */
+            return await Transfer(request, cancellationToken);
         }
 
-        private async Task<FundTransferResponse>  Transfer(FundTransferCommand request, CancellationToken cancellationToken)
+        private async Task<FundTransferResponse> Transfer(FundTransferCommand request, CancellationToken cancellationToken)
         {
             bool transferSuccess = false;
             Account debitAccount = null;
@@ -71,7 +86,6 @@
                 {
                     using (transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted))
                     {
-
                         var repository = new AccountRepository(connection, transaction);
 
                         debitAccount = await repository.ReadById(request.AccountNumDebit);
@@ -93,7 +107,7 @@
             catch (DBConcurrencyException)
             {
                 //_logger.LogWarning("Concurrency exception while fund transfer.");
-                throw;
+                //throw;
             }
             catch (Exception ex)
             {
@@ -104,7 +118,7 @@
             if (creditAccount == null || debitAccount == null)
                 return null;
             else
-                return new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance, 
+                return new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
                     debitAccount.AccountNum, debitAccount.Balance,
                     transferSuccess);
         }

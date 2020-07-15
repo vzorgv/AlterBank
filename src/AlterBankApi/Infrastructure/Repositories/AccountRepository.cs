@@ -73,7 +73,7 @@
             var result = await _connection.QueryFirstOrDefaultAsync<Account>(sql, param: parms, transaction: _transaction);
 
             if (result == null)
-                throw new DBConcurrencyException($"The account {account.AccountNum} you are trying to edit has changed.");
+                throw new DBConcurrencyException($"The account {account.AccountNum} you are trying to edit has changed in another transaction.");
 
             return result;
         }
