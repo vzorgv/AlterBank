@@ -1,18 +1,39 @@
 ﻿namespace AlterBankApi.Infrastructure.Repositories
 {
     using System.Collections.Generic;
-    using System.Data;
     using System.Threading.Tasks;
-    using AlterBankApi.Application.DataModel;
 
-    public interface IAccountRepository
+    /// <summary>
+    /// Repository declaration
+    /// </summary>
+    /// <typeparam name="TEntity">The entity of type T</T></typeparam>
+    public interface IAccountRepository<TEntity>
     {
-        Task<IEnumerable<Account>> Read();
+        /// <summary>
+        /// Reads all entities
+        /// </summary>
+        /// <returns>Collection of entities</returns>
+        Task<IEnumerable<TEntity>> Read();
 
-        Task<Account> ReadById(string accountNum);
+        /// <summary>
+        /// Reads entity by its identity
+        /// </summary>
+        /// <param name="Id">The identity</param>
+        /// <returns>Entity associated with identity</returns>
+        Task<TEntity> ReadById(string Id);
 
-        Task<Account> Create(Account account);
+        /// <summary>
+        /// Creates entity
+        /// </summary>
+        /// <param name="entity">The entity to be created</param>
+        /// <returns></returns>
+        Task<TEntity> Create(TEntity entity);
 
-        Task<Account> Update(Account account);
+        /// <summary>
+        /// Updates entity
+        /// </summary>
+        /// <param name="entity">Entity to be updated</param>
+        /// <returns>Updated entity</returns>
+        Task<TEntity> Update(TEntity entity);
     }
 }

@@ -15,7 +15,7 @@
     using AlterBankApi.Infrastructure.Repositories;
 
     /// <summary>
-    /// Handles command which midified account state
+    /// Handles commands which midify account state
     /// </summary>
     public class AccountCommandHandler :
         IRequestHandler<OpenAccountCommand, OpenAccountResponse>,

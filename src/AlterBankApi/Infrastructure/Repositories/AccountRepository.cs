@@ -7,7 +7,10 @@
     using Dapper;
     using AlterBankApi.Application.DataModel;
 
-    public class AccountRepository : IAccountRepository
+    /// <summary>
+    /// Implemnts repository for <c>Account</c> entity
+    /// </summary>
+    public class AccountRepository : IAccountRepository<Account>
     {
         private readonly IDbConnection _connection;
         private readonly IDbTransaction _transaction;
