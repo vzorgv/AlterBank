@@ -13,6 +13,7 @@
     using AlterBankApi.Application.Responses;
     using AlterBankApi.Infrastructure;
     using AlterBankApi.Infrastructure.Repositories;
+    using System.Data.Common;
 
     /// <summary>
     /// Handles commands which midify account state
@@ -57,33 +58,6 @@
             return new OpenAccountResponse(result.AccountNum);
         }
 
-        /*
-        public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
-        {
-            //TODO performance degradation
-            
-            const int RetryCount = 2;
-            const int RetryDelayMs = 2;
-
-            FundTransferResponse ret = null;
-
-            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromMilliseconds(RetryDelayMs), retryCount: RetryCount, fastFirst: true);
-
-            var retryPolicy = Policy
-                .Handle<DBConcurrencyException>()
-                .WaitAndRetryAsync(delay);
-
-            try
-            {
-                ret = await retryPolicy.ExecuteAsync(async () => await Transfer(request, cancellationToken));
-            }
-            catch (DBConcurrencyException)
-            {
-            }
-
-            return await Transfer(request, cancellationToken);
-        }
-    */
         /// <summary>
         /// Handles <c>FundTransferCommand</c> command
         /// </summary>
@@ -92,6 +66,8 @@
         /// <returns>Result of command execution as <c>FundTransferResponse</c> instance</returns>
         public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
         {
+            //TODO performance degradation
+            
             bool transferSuccess = false;
             Account debitAccount = null;
             Account creditAccount = null;
@@ -99,7 +75,14 @@
             IDbConnection connection;
             IDbTransaction transaction;
 
-            try
+            //TODO review delay
+            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromMilliseconds(10), retryCount: 3, fastFirst: false);
+
+            var retryPolicy = Policy
+                .Handle<DbException>()
+                .WaitAndRetryAsync(delay);
+
+            return await retryPolicy.ExecuteAsync(async () =>
             {
                 using (connection = await _dbConnectionFactory.CreateConnectionAsync())
                 {
@@ -114,32 +97,25 @@
 
                         if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
                         {
+                            //TODO parallel them
                             debitAccount = await UpdateAccountBalance(repository, debitAccount, transferAmount, true);
+                            if (debitAccount != null)
                             creditAccount = await UpdateAccountBalance(repository, creditAccount, transferAmount, false);
-
+                                
+                        if (creditAccount != null && debitAccount != null)
                             transferSuccess = true;
                         }
                         transaction.Commit();
                     }
                 }
-            }
-            catch (DBConcurrencyException)
-            {
-                // _logger.LogWarning("Concurrency exception while fund transfer.");
-                // throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Fund transfer error due to databse error.");
-                throw;
-            }
 
-            if (creditAccount == null || debitAccount == null)
-                return null;
-            else
-                return new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
-                    debitAccount.AccountNum, debitAccount.Balance,
-                    transferSuccess);
+                if (creditAccount == null || debitAccount == null)
+                    return null;
+                else
+                    return new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
+                        debitAccount.AccountNum, debitAccount.Balance,
+                        transferSuccess);
+            });
         }
 
         private bool IsTransferAllowed(Account accountDebit, Account accountCredit, decimal transferAmount)

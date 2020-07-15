@@ -7,7 +7,7 @@
     /// Repository declaration
     /// </summary>
     /// <typeparam name="TEntity">The entity of type T</T></typeparam>
-    public interface IAccountRepository<TEntity>
+    public interface IRepository<TEntity>
     {
         /// <summary>
         /// Reads all entities

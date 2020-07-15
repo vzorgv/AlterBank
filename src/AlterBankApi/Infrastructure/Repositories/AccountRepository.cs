@@ -10,7 +10,7 @@
     /// <summary>
     /// Implemnts repository for <c>Account</c> entity
     /// </summary>
-    public class AccountRepository : IAccountRepository<Account>
+    public class AccountRepository : IRepository<Account>
     {
         private readonly IDbConnection _connection;
         private readonly IDbTransaction _transaction;
@@ -53,30 +53,20 @@
         {
             if (account == null)
                 throw new ArgumentNullException(nameof(account));
-
-            if (account.RowVersion == null)
-                throw new ArgumentNullException("RowVersion");
-
+ 
             var sql = @"UPDATE AccountTable 
                         SET AccountNum      = @AccountNum,
                             Balance         = @Balance
                         OUTPUT inserted.*
-                        WHERE AccountNum = @AccountNum
-                        AND   RowVersion = @RowVersion";
+                        WHERE AccountNum = @AccountNum";
 
             var parms = new
             {
                 AccountNum = account.AccountNum,
-                Balance = account.Balance,
-                RowVersion = account.RowVersion
+                Balance = account.Balance
             };
 
-            var result = await _connection.QueryFirstOrDefaultAsync<Account>(sql, param: parms, transaction: _transaction);
-
-            if (result == null)
-                throw new DBConcurrencyException($"The account {account.AccountNum} you are trying to edit has changed in another transaction.");
-
-            return result;
+            return await _connection.QueryFirstOrDefaultAsync<Account>(sql, param: parms, transaction: _transaction);
         }
     }
 }
