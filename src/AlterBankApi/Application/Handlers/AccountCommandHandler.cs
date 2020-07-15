@@ -2,7 +2,6 @@
 {
     using System;
     using System.Data;
-    using System.Data.SqlClient;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
@@ -106,8 +105,8 @@
             }
             catch (DBConcurrencyException)
             {
-                //_logger.LogWarning("Concurrency exception while fund transfer.");
-                //throw;
+                // _logger.LogWarning("Concurrency exception while fund transfer.");
+                // throw;
             }
             catch (Exception ex)
             {
