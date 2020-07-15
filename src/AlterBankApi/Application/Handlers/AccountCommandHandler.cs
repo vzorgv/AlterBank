@@ -2,16 +2,18 @@
 {
     using System;
     using System.Data;
+    using System.Data.SqlClient;
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
     using Microsoft.Extensions.Logging;
+    using Polly;
+    using Polly.Contrib.WaitAndRetry;
     using AlterBankApi.Application.Commands;
     using AlterBankApi.Application.DataModel;
     using AlterBankApi.Application.Responses;
     using AlterBankApi.Infrastructure.Repositories;
     using AlterBankApi.Infrastructure;
-    using System.Data.SqlClient;
 
     public class AccountCommandHandler :
         IRequestHandler<OpenAccountCommand, OpenAccountResponse>,
@@ -44,6 +46,17 @@
         }
 
         public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
+        {
+            var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromMilliseconds(5), retryCount: 3, fastFirst: true);
+
+            var retryPolicy = Policy
+                .Handle<DBConcurrencyException>()
+                .WaitAndRetryAsync(delay);
+
+            return await retryPolicy.ExecuteAsync(async () => await Transfer(request, cancellationToken));
+        }
+
+        private async Task<FundTransferResponse>  Transfer(FundTransferCommand request, CancellationToken cancellationToken)
         {
             bool transferSuccess = false;
             Account debitAccount = null;
@@ -79,12 +92,8 @@
             }
             catch (DBConcurrencyException)
             {
-                _logger.LogWarning("Concurrency exception while fund transfer.");
-            }
-            catch (SqlException ex)
-            {
-                //TODO add resilency
-                _logger.LogWarning(ex.Message);
+                //_logger.LogWarning("Concurrency exception while fund transfer.");
+                throw;
             }
             catch (Exception ex)
             {
