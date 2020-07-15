@@ -11,8 +11,8 @@
     using AlterBankApi.Application.Commands;
     using AlterBankApi.Application.DataModel;
     using AlterBankApi.Application.Responses;
-    using AlterBankApi.Infrastructure.Repositories;
     using AlterBankApi.Infrastructure;
+    using AlterBankApi.Infrastructure.Repositories;
 
     public class AccountCommandHandler :
         IRequestHandler<OpenAccountCommand, OpenAccountResponse>,
@@ -43,10 +43,11 @@
             return new OpenAccountResponse(result.AccountNum);
         }
 
+        /*
         public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
         {
             //TODO performance degradation
-            /*
+            
             const int RetryCount = 2;
             const int RetryDelayMs = 2;
 
@@ -65,11 +66,12 @@
             catch (DBConcurrencyException)
             {
             }
-            */
+
             return await Transfer(request, cancellationToken);
         }
+    */
 
-        private async Task<FundTransferResponse> Transfer(FundTransferCommand request, CancellationToken cancellationToken)
+        public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
         {
             bool transferSuccess = false;
             Account debitAccount = null;
@@ -123,10 +125,13 @@
 
         private bool IsTransferAllowed(Account accountDebit, Account accountCredit, decimal transferAmount)
         {
-            if (CalcDebitAmount(accountDebit, transferAmount) < 0)
+            if (accountCredit.AccountNum == accountDebit.AccountNum)
                 return false;
 
-            if (accountCredit.AccountNum == accountDebit.AccountNum)
+            if (transferAmount == decimal.Zero)
+                return false;
+
+            if (CalcDebitAmount(accountDebit, transferAmount) < 0)
                 return false;
 
             return true;
