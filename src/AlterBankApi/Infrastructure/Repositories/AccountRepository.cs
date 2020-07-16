@@ -5,7 +5,7 @@
     using System.Data;
     using System.Threading.Tasks;
     using Dapper;
-    using AlterBankApi.Application.DataModel;
+    using AlterBankApi.Application.Model;
 
     /// <summary>
     /// Implemnts repository for <c>Account</c> entity

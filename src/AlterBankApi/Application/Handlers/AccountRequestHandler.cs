@@ -7,43 +7,58 @@
     using System.Threading.Tasks;
     using MediatR;
     using Microsoft.Extensions.Logging;
+    using AlterBankApi.Application.Model;
     using AlterBankApi.Application.Requests;
     using AlterBankApi.Application.Responses;
     using AlterBankApi.Infrastructure;
     using AlterBankApi.Infrastructure.Repositories;
 
+    /// <summary>
+    /// Handler of requests to Account
+    /// </summary>
     public class AccountRequestHandler :
-        IRequestHandler<GetAccountRequest, GetAccountResponse>,
-        IRequestHandler<GetListOfAccountsRequest, IEnumerable<GetAccountResponse>>
+        IRequestHandler<GetAccountRequestById, Account>,
+        IRequestHandler<GetListOfAccountsRequest, IEnumerable<Account>>
     {
         private readonly IDatabaseConnectionFactory _dbConnectionFactory;
-        private readonly ILogger<AccountRequestHandler> _logger;
 
-        public AccountRequestHandler(IDatabaseConnectionFactory dbCconnectionFactory, ILogger<AccountRequestHandler> logger)
+        /// <summary>
+        /// Constructs <c>AccountRequestHandler</c> instance
+        /// </summary>
+        /// <param name="dbCconnectionFactory">Connection factory to database</param>
+        public AccountRequestHandler(IDatabaseConnectionFactory dbCconnectionFactory)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _dbConnectionFactory = dbCconnectionFactory ?? throw new ArgumentNullException(nameof(dbCconnectionFactory));
         }
 
-        public async Task<IEnumerable<GetAccountResponse>> Handle(GetListOfAccountsRequest request, CancellationToken cancellationToken)
+        /// <summary>
+        /// Handles the <c>GetListOfAccountsRequest</c> request asynchroniously
+        /// </summary>
+        /// <param name="request">The request</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>The list account accounts</returns>
+        public async Task<IEnumerable<Account>> Handle(GetListOfAccountsRequest request, CancellationToken cancellationToken)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             var repository = new AccountRepository(connection);
 
             var result = await repository.Read();
 
-            return result
-                .Select(account => new GetAccountResponse(account))
-                .ToList();
+            return result.ToList();
         }
 
-        public async Task<GetAccountResponse> Handle(GetAccountRequest request, CancellationToken cancellationToken)
+        /// <summary>
+        /// Handles the <c>GetAccountRequestById</c> request asynchroniously
+        /// </summary>
+        /// <param name="request">The request</param>
+        /// <param name="cancellationToken">The cancellation token</param>
+        /// <returns>The account if exit or null otherwise</returns>
+        public async Task<Account> Handle(GetAccountRequestById request, CancellationToken cancellationToken)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             var repository = new AccountRepository(connection);
 
-            var result =  await repository.ReadById(request.AccountNum);
-            return result == null ? null : new GetAccountResponse(result);
+            return await repository.ReadById(request.AccountNum);
         }
     }
 }

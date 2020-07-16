@@ -1,12 +1,23 @@
 ﻿namespace AlterBankApi.Application.Requests
 {
     using MediatR;
-    using AlterBankApi.Application.Responses;
+    using AlterBankApi.Application.Model;
 
-    public sealed class GetAccountRequest : IRequest<GetAccountResponse>
+    /// <summary>
+    /// The request to get <c>Account</c> by its number
+    /// </summary>
+    public sealed class GetAccountRequestById : IRequest<Account>
     {
+        /// <summary>
+        /// The account number
+        /// </summary>
         public string AccountNum { get; }
-        public GetAccountRequest(string accountNum)
+
+        /// <summary>
+        /// Constructs the <c>GetAccountRequestById</c> instance
+        /// </summary>
+        /// <param name="accountNum">Account number to find</param>
+        public GetAccountRequestById(string accountNum)
         {
             AccountNum = accountNum;
         }

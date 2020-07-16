@@ -7,7 +7,7 @@
     using MediatR;
     using Microsoft.Extensions.Logging;
     using AlterBankApi.Application.Commands;
-    using AlterBankApi.Application.DataModel;
+    using AlterBankApi.Application.Model;
     using AlterBankApi.Application.Responses;
     using AlterBankApi.Infrastructure;
     using AlterBankApi.Infrastructure.Repositories;
@@ -17,7 +17,7 @@
     /// Handles commands which midify account state
     /// </summary>
     public class AccountCommandHandler :
-        IRequestHandler<OpenAccountCommand, OpenAccountResponse>,
+        IRequestHandler<CreateAccountCommand, Account>,
         IRequestHandler<FundTransferCommand, FundTransferResponse>
     {
         private readonly IDatabaseConnectionFactory _dbConnectionFactory;
@@ -40,20 +40,12 @@
         /// <param name="request">The command</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Result of command execution as <c>OpenAccountResponse</c> instance</returns>
-        public async Task<OpenAccountResponse> Handle(OpenAccountCommand request, CancellationToken cancellationToken)
+        public async Task<Account> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
         {
-            var account = new Account
-            {
-                AccountNum = request.AccountNum,
-                Balance = request.Balance
-            };
-
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             var repository = new AccountRepository(connection);
 
-            var result =  await repository.Create(account);
-
-            return new OpenAccountResponse(result.AccountNum);
+            return await repository.Create(request.Account);
         }
 
         /// <summary>
@@ -89,6 +81,7 @@
                         if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
                         {
                             debitAccount.Balance = CalcBalanceDebit(debitAccount, transferAmount);
+                            //TODO someone committed here in another connection
                             creditAccount.Balance = CalcBalnceCredit(creditAccount, transferAmount);
 
                             await repository.UpdateBalancePair(creditAccount, debitAccount);

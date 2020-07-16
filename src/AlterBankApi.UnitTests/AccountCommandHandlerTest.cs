@@ -1,5 +1,5 @@
 using AlterBankApi.Application.Commands;
-using AlterBankApi.Application.DataModel;
+using AlterBankApi.Application.Model;
 using AlterBankApi.Application.Handlers;
 using AlterBankApi.Infrastructure;
 using Moq;

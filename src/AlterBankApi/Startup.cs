@@ -5,9 +5,12 @@ namespace AlterBankApi
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.PlatformAbstractions;
+    using Microsoft.OpenApi.Models;
     using Autofac;
     using AlterBankApi.Infrastructure;
-    using Microsoft.OpenApi.Models;
+
+    using System.IO;
 
     public class Startup
     {
@@ -28,7 +31,16 @@ namespace AlterBankApi
             
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Alter bank API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo
+                { 
+                    Title = "Alter bank API",
+                    Version = "v1",
+                    Description = "Some Alter bank service"
+                });
+
+                var basePath = PlatformServices.Default.Application.ApplicationBasePath;
+                var xmlPath = Path.Combine(basePath, "AlterBankApi.xml");
+                c.IncludeXmlComments(xmlPath);
             });
         }
 

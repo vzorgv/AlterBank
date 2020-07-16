@@ -2,58 +2,99 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.Net;
     using System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using AlterBankApi.Application.Commands;
     using AlterBankApi.Application.Requests;
-    using AlterBankApi.Application.Responses;
-    using Microsoft.Extensions.Logging;
     using AlterBankApi.Extensions;
+    using AlterBankApi.Application.Model;
 
+    /// <summary>
+    /// Account controller
+    /// </summary>
     [Route("api/v1/[controller]")]
     [Produces("application/json")]
     [ApiController]
     public class AccountController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IMediator mediator, ILogger<AccountController> logger)
+        /// <summary>
+        /// Constructs <c>AccountController</c> instance
+        /// </summary>
+        /// <param name="mediator"></param>
+        public AccountController(IMediator mediator)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        /// <summary>
+        /// Gets list of all accounts
+        /// </summary>
+        /// <remarks>
+        /// GET /list
+        /// </remarks>
+        /// <returns>List of accounts</returns>
         [HttpGet]
         [Route("list")]
-        [ProducesResponseType(typeof(List<GetAccountResponse>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<IEnumerable<GetAccountResponse>>> GetListOfAccountsAsync()
+        [ProducesResponseType(typeof(IEnumerable<Account>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<Account>>> GetListOfAccountsAsync()
         {
-            return await _mediator.SendWithActionResult(new GetListOfAccountsRequest(), result => Ok(result), result => BadRequest());
+            return await _mediator.SendWithActionResult(new GetListOfAccountsRequest(),
+                result => Ok(result),
+                result => Ok());
         }
 
+        /// <summary>
+        /// Gets the balance
+        /// </summary>
+        /// <remarks>
+        /// 
+        ///     GET /1234567890/balance
+        /// 
+        /// </remarks>
+        /// <param name="accountNum">The account number</param>
+        /// <return>Account balance</return>
+        /// <response code="200">Returns balance amount</response>
+        /// <response code="404">If the account not found</response>
         [HttpGet]
-        [Route("balance")]
+        [Route("{accountNum}/balance")]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(decimal), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<decimal>> GetAccountAsync([FromQuery] string accountNum)
+        public async Task<ActionResult<decimal>> GetBalanceAsync([FromRoute, Required] string accountNum)
         {
-            if (string.IsNullOrEmpty(accountNum))
-                return BadRequest();
-            
-            return await _mediator.SendWithActionResult(new GetAccountRequest(accountNum), result => Ok(result.Balance), result => NotFound());
+             return await _mediator.SendWithActionResult(new GetAccountRequestById(accountNum),
+                result => Ok(result.Balance),
+                result => NotFound());
         }
 
-        [HttpPost("open")]
+        /// <summary>
+        /// Creates an account
+        /// </summary>
+        /// <remarks>
+        ///
+        ///     POST/create
+        ///     {
+        ///         "accountNum": "1234567890",
+        ///         "balance": 100.00
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="account">The account</param>
+        /// <returns>New created Account</returns>
+        /// <response code="201">Returns the newly created Account</response>
+        /// <response code="400">If the item is not created</response>
+        [HttpPost("create")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(OpenAccountResponse), (int)HttpStatusCode.Created)]
-        public async Task<ActionResult<OpenAccountResponse>> OpenAccount([FromBody] OpenAccountCommand openAccountCommand)
+        [ProducesResponseType(typeof(Account), (int)HttpStatusCode.Created)]
+        public async Task<ActionResult<Account>> CreateAsync([FromBody, Required] Account account)
         {
-            return await _mediator.SendWithActionResult(openAccountCommand, result => Created(string.Empty, result), result => BadRequest());
+            return await _mediator.SendWithActionResult(new CreateAccountCommand(account),
+                result => Created(string.Empty, result),
+                result => BadRequest());
         }
     }
 }

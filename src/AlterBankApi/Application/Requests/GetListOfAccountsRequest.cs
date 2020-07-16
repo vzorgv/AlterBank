@@ -2,9 +2,12 @@
 {
     using System.Collections.Generic;
     using MediatR;
-    using AlterBankApi.Application.Responses;
+    using AlterBankApi.Application.Model;
 
-    public sealed class GetListOfAccountsRequest : IRequest<IEnumerable<GetAccountResponse>>
+    /// <summary>
+    /// Request to get list of accounts
+    /// </summary>
+    public sealed class GetListOfAccountsRequest : IRequest<IEnumerable<Account>>
     {
         //left empty on purpose
     }

@@ -1,0 +1,271 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AlterBankApi</name>
+    </assembly>
+    <members>
+        <member name="T:AlterBankApi.Application.Commands.CreateAccountCommand">
+            <summary>
+            Comand to create Account
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Commands.CreateAccountCommand.Account">
+            <summary>
+            Account to create
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Application.Commands.CreateAccountCommand.#ctor(AlterBankApi.Application.Model.Account)">
+            <summary>
+            Constructs <c>CreateAccountCommand</c> instance
+            </summary>
+            <param name="account"></param>
+        </member>
+        <member name="T:AlterBankApi.Application.Commands.FundTransferCommand">
+            <summary>
+            Command to fund transfer
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Commands.FundTransferCommand.AccountNumDebit">
+            <summary>
+            The account to be withdrawn
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Commands.FundTransferCommand.AccountNumCredit">
+            <summary>
+            The account to be deposited
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Commands.FundTransferCommand.Amount">
+            <summary>
+            Transfer amount
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Application.Commands.FundTransferCommand.#ctor(System.String,System.String,System.Decimal)">
+            <summary>
+            Constructs class instance
+            </summary>
+            <param name="accountNumCredit">The account to be deposited</param>
+            <param name="accountNumDebit">The account to be withdrew</param>
+            <param name="amount">Transfer amount</param>
+        </member>
+        <member name="T:AlterBankApi.Application.Handlers.AccountCommandHandler">
+            <summary>
+            Handles commands which midify account state
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Application.Handlers.AccountCommandHandler.#ctor(AlterBankApi.Infrastructure.IDatabaseConnectionFactory,Microsoft.Extensions.Logging.ILogger{AlterBankApi.Application.Handlers.AccountCommandHandler})">
+            <summary>
+            Constructs class instance
+            </summary>
+            <param name="dbCconnectionFactory">Connection factory</param>
+            <param name="logger">Logger instance</param>
+        </member>
+        <member name="M:AlterBankApi.Application.Handlers.AccountCommandHandler.Handle(AlterBankApi.Application.Commands.CreateAccountCommand,System.Threading.CancellationToken)">
+            <summary>
+            Handles <c>OpenAccountCommand</c> command
+            </summary>
+            <param name="request">The command</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Result of command execution as <c>OpenAccountResponse</c> instance</returns>
+        </member>
+        <member name="M:AlterBankApi.Application.Handlers.AccountCommandHandler.Handle(AlterBankApi.Application.Commands.FundTransferCommand,System.Threading.CancellationToken)">
+            <summary>
+            Handles <c>FundTransferCommand</c> command
+            </summary>
+            <param name="request">The command</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>
+            Result of command execution as <c>FundTransferResponse</c> instance or null in case of concurency exception cought 
+            </returns>
+        </member>
+        <member name="T:AlterBankApi.Application.Handlers.AccountRequestHandler">
+            <summary>
+            Handler of requests to Account
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Application.Handlers.AccountRequestHandler.#ctor(AlterBankApi.Infrastructure.IDatabaseConnectionFactory)">
+            <summary>
+            Constructs <c>AccountRequestHandler</c> instance
+            </summary>
+            <param name="dbCconnectionFactory">Connection factory to database</param>
+        </member>
+        <member name="M:AlterBankApi.Application.Handlers.AccountRequestHandler.Handle(AlterBankApi.Application.Requests.GetListOfAccountsRequest,System.Threading.CancellationToken)">
+            <summary>
+            Handles the <c>GetListOfAccountsRequest</c> request asynchroniously
+            </summary>
+            <param name="request">The request</param>
+            <param name="cancellationToken">The cancellation token</param>
+            <returns>The list account accounts</returns>
+        </member>
+        <member name="M:AlterBankApi.Application.Handlers.AccountRequestHandler.Handle(AlterBankApi.Application.Requests.GetAccountRequestById,System.Threading.CancellationToken)">
+            <summary>
+            Handles the <c>GetAccountRequestById</c> request asynchroniously
+            </summary>
+            <param name="request">The request</param>
+            <param name="cancellationToken">The cancellation token</param>
+            <returns>The account if exit or null otherwise</returns>
+        </member>
+        <member name="T:AlterBankApi.Application.Model.Account">
+            <summary>
+            The account entity
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Model.Account.AccountNum">
+            <summary>
+            Account number
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Model.Account.Balance">
+            <summary>
+            Balance amount
+            </summary>
+        </member>
+        <member name="T:AlterBankApi.Application.Requests.GetAccountRequestById">
+            <summary>
+            The request to get <c>Account</c> by its number
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Requests.GetAccountRequestById.AccountNum">
+            <summary>
+            The account number
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Application.Requests.GetAccountRequestById.#ctor(System.String)">
+            <summary>
+            Constructs the <c>GetAccountRequestById</c> instance
+            </summary>
+            <param name="accountNum">Account number to find</param>
+        </member>
+        <member name="T:AlterBankApi.Application.Requests.GetListOfAccountsRequest">
+            <summary>
+            Request to get list of accounts
+            </summary>
+        </member>
+        <member name="T:AlterBankApi.Application.Responses.FundTransferResponse">
+            <summary>
+            The result of transfer command
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.FundTransferResponse.IsSuccess">
+            <summary>
+            True if command succeded otherwise false
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.FundTransferResponse.AccountNumDebit">
+            <summary>
+            Withdrew account number
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.FundTransferResponse.BalanceDebit">
+            <summary>
+            Balance
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "P:AlterBankApi.Application.Responses.FundTransferResponse.AccountNumCredit" -->
+        <member name="P:AlterBankApi.Application.Responses.FundTransferResponse.BalanceCredit">
+            <summary>
+            Balance
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.FundTransferResponse.AccountCredit">
+            <summary>
+            Deposited account
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Application.Responses.FundTransferResponse.#ctor(System.String,System.Decimal,System.String,System.Decimal,System.Boolean)">
+            <summary>
+            Constructs the <c>FundTransferResponse</c> instance
+            </summary>
+            <param name="accountNumCredit">Credit account numebr</param>
+            <param name="balanceCredit">Balance</param>
+            <param name="accountNumDebit">Debit account numebr</param>
+            <param name="balanceDebit">Balance</param>
+            <param name="isSuccess">Transfer result</param>
+        </member>
+        <member name="T:AlterBankApi.Controllers.AccountController">
+            <summary>
+            Account controller
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Controllers.AccountController.#ctor(MediatR.IMediator)">
+            <summary>
+            Constructs <c>AccountController</c> instance
+            </summary>
+            <param name="mediator"></param>
+        </member>
+        <member name="M:AlterBankApi.Controllers.AccountController.GetListOfAccountsAsync">
+            <summary>
+            Gets list of all accounts
+            </summary>
+            <remarks>
+            GET /list
+            </remarks>
+            <returns>List of accounts</returns>
+        </member>
+        <member name="M:AlterBankApi.Controllers.AccountController.GetBalanceAsync(System.String)">
+            <summary>
+            Gets the balance
+            </summary>
+            <remarks>
+            
+                GET /1234567890/balance
+            
+            </remarks>
+            <param name="accountNum">The account number</param>
+            <return>Account balance</return>
+            <response code="200">Returns balance amount</response>
+            <response code="404">If the account not found</response>
+        </member>
+        <member name="M:AlterBankApi.Controllers.AccountController.CreateAsync(AlterBankApi.Application.Model.Account)">
+             <summary>
+             Creates an account
+             </summary>
+             <remarks>
+            
+                 POST/create
+                 {
+                     "accountNum": "1234567890",
+                     "balance": 100.00
+                 }
+            
+             </remarks>
+             <param name="account">The account</param>
+             <returns>New created Account</returns>
+             <response code="201">Returns the newly created Account</response>
+             <response code="400">If the item is not created</response>
+        </member>
+        <member name="T:AlterBankApi.Infrastructure.Repositories.AccountRepository">
+            <summary>
+            Implemnts repository for <c>Account</c> entity
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:AlterBankApi.Infrastructure.Repositories.IRepository`1" -->
+        <member name="M:AlterBankApi.Infrastructure.Repositories.IRepository`1.Read">
+            <summary>
+            Reads all entities
+            </summary>
+            <returns>Collection of entities</returns>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.Repositories.IRepository`1.ReadById(System.String)">
+            <summary>
+            Reads entity by its identity
+            </summary>
+            <param name="Id">The identity</param>
+            <returns>Entity associated with identity</returns>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.Repositories.IRepository`1.Create(`0)">
+            <summary>
+            Creates entity
+            </summary>
+            <param name="entity">The entity to be created</param>
+            <returns></returns>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.Repositories.IRepository`1.Update(`0)">
+            <summary>
+            Updates entity
+            </summary>
+            <param name="entity">Entity to be updated</param>
+            <returns>Updated entity</returns>
+        </member>
+    </members>
+</doc>

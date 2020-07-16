@@ -10,7 +10,7 @@
     public sealed class FundTransferCommand : IRequest<FundTransferResponse>
     {
         /// <summary>
-        /// The account to be withdrew
+        /// The account to be withdrawn
         /// </summary>
         [Required]
         [MinLength(1)]
