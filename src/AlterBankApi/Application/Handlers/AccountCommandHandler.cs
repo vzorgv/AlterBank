@@ -6,15 +6,11 @@
     using System.Threading.Tasks;
     using MediatR;
     using Microsoft.Extensions.Logging;
-    using Polly;
-    using Polly.Contrib.WaitAndRetry;
     using AlterBankApi.Application.Commands;
     using AlterBankApi.Application.DataModel;
     using AlterBankApi.Application.Responses;
     using AlterBankApi.Infrastructure;
     using AlterBankApi.Infrastructure.Repositories;
-    using System.Data.Common;
-    using Dapper;
     using System.Data.SqlClient;
 
     /// <summary>
@@ -68,28 +64,16 @@
         /// <returns>Result of command execution as <c>FundTransferResponse</c> instance</returns>
         public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
         {
-            //TODO performance degradation
-            
-            bool transferSuccess = false;
+            FundTransferResponse response = null;
+            bool transferResult = false;
             Account debitAccount = null;
             Account creditAccount = null;
 
-            IDbConnection connection;
-            IDbTransaction transaction;
-
-            //TODO consider to use random 
-            //var delay = Backoff.DecorrelatedJitterBackoffV2(medianFirstRetryDelay: TimeSpan.FromMilliseconds(10), retryCount: 3, fastFirst: false);
-
-            //var retryPolicy = Policy
-            //    .Handle<DBConcurrencyException>()
-            //    .WaitAndRetryAsync(delay);
-
-            //return await retryPolicy.ExecuteAsync(async () =>
             try
             {
-                using (connection = await _dbConnectionFactory.CreateConnectionAsync())
+                using (var connection = await _dbConnectionFactory.CreateConnectionAsync())
                 {
-                    using (transaction = connection.BeginTransaction(IsolationLevel.Snapshot))
+                    using (var transaction = connection.BeginTransaction(IsolationLevel.Snapshot))
                     {
                         var repository = new AccountRepository(connection, transaction);
 
@@ -104,30 +88,39 @@
                             {
                                 debitAccount.Balance = CalcBalanceDebit(debitAccount, transferAmount);
                                 creditAccount.Balance = CalcBalnceCredit(creditAccount, transferAmount);
-                                
+
                                 await repository.UpdateBalancePair(creditAccount, debitAccount);
 
-                                transferSuccess = true;
+                                transferResult = true;
                             }
                         }
                         transaction.Commit();
                     }
                 }
+
+                response = new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
+                                                    debitAccount.AccountNum, debitAccount.Balance,
+                                                    transferResult);
             }
             catch (SqlException ex)
             {
-                // TODO extract to method
-                if (ex.Number != 3960 && ex.State != 5)
+                if (IsConcurencySnapshotUpdateException(ex))
+                {
+                    response = new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
+                                                    debitAccount.AccountNum, debitAccount.Balance, false);
+                }
+                else
+                {
                     throw;
+                }
             }
 
-            //TODO refactoring return value
-            if (creditAccount == null || debitAccount == null)
-                    return null;
-                else
-                    return new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
-                        debitAccount.AccountNum, debitAccount.Balance,
-                        transferSuccess);
+            return response;
+        }
+
+        private bool IsConcurencySnapshotUpdateException(SqlException exeption)
+        {
+            return exeption.Number == 3960 && exeption.State == 5;
         }
 
         private bool IsTransferAllowed(Account accountDebit, Account accountCredit, decimal transferAmount)
