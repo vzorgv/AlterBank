@@ -61,7 +61,9 @@
         /// </summary>
         /// <param name="request">The command</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Result of command execution as <c>FundTransferResponse</c> instance</returns>
+        /// <returns>
+        /// Result of command execution as <c>FundTransferResponse</c> instance or null in case of concurency exception cought 
+        /// </returns>
         public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
         {
             bool transferResult = false;
@@ -105,9 +107,7 @@
             {
                 if (IsConcurencySnapshotUpdateException(ex))
                 {
-                    response = new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
-                                                        debitAccount.AccountNum, debitAccount.Balance,
-                                                        false);
+                    response = null;
                 }
                 else
                 {

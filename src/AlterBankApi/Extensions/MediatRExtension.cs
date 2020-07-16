@@ -7,7 +7,7 @@
 
     internal static class MediatRExtension
     {
-        public static async Task<ActionResult<TResponse>> SendWithActionResult<TResponse>(this IMediator mediator, 
+        public static async Task<ActionResult> SendWithActionResult<TResponse>(this IMediator mediator, 
             IRequest<TResponse> request,
             Func<TResponse, ActionResult> successResponseHandler,
             Func<TResponse, ActionResult> nullResponseHandler)

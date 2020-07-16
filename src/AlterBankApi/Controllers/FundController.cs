@@ -25,11 +25,11 @@
         }
 
         [HttpPost("transfer")]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.ServiceUnavailable)]
         [ProducesResponseType(typeof(FundTransferResponse), (int)HttpStatusCode.OK)]
         public async Task <ActionResult<FundTransferResponse>> Transfer([FromBody] FundTransferCommand fundTransferCommand)
         {
-            return await _mediator.SendWithActionResult(fundTransferCommand, result => Ok(result), result => BadRequest());
+            return await _mediator.SendWithActionResult(fundTransferCommand, result => Ok(result), result => new StatusCodeResult((int)HttpStatusCode.ServiceUnavailable));
         }
     }
 }
