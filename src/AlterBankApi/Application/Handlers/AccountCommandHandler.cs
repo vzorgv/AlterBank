@@ -64,38 +64,37 @@
         /// <returns>Result of command execution as <c>FundTransferResponse</c> instance</returns>
         public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
         {
-            FundTransferResponse response = null;
             bool transferResult = false;
             Account debitAccount = null;
             Account creditAccount = null;
+            FundTransferResponse response;
 
             try
             {
                 using (var connection = await _dbConnectionFactory.CreateConnectionAsync())
                 {
-                    using (var transaction = connection.BeginTransaction(IsolationLevel.Snapshot))
+                    using var transaction = connection.BeginTransaction(IsolationLevel.Snapshot);
+
+                    var repository = new AccountRepository(connection, transaction);
+
+                    debitAccount = await repository.ReadById(request.AccountNumDebit);
+                    creditAccount = await repository.ReadById(request.AccountNumCredit);
+
+                    if (debitAccount != null && creditAccount != null)
                     {
-                        var repository = new AccountRepository(connection, transaction);
+                        var transferAmount = request.Amount;
 
-                        debitAccount = await repository.ReadById(request.AccountNumDebit);
-                        creditAccount = await repository.ReadById(request.AccountNumCredit);
-
-                        if (debitAccount != null && creditAccount != null)
+                        if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
                         {
-                            var transferAmount = request.Amount;
+                            debitAccount.Balance = CalcBalanceDebit(debitAccount, transferAmount);
+                            creditAccount.Balance = CalcBalnceCredit(creditAccount, transferAmount);
 
-                            if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
-                            {
-                                debitAccount.Balance = CalcBalanceDebit(debitAccount, transferAmount);
-                                creditAccount.Balance = CalcBalnceCredit(creditAccount, transferAmount);
+                            await repository.UpdateBalancePair(creditAccount, debitAccount);
 
-                                await repository.UpdateBalancePair(creditAccount, debitAccount);
-
-                                transferResult = true;
-                            }
+                            transferResult = true;
                         }
-                        transaction.Commit();
                     }
+                    transaction.Commit();
                 }
 
                 response = new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
@@ -107,7 +106,8 @@
                 if (IsConcurencySnapshotUpdateException(ex))
                 {
                     response = new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
-                                                    debitAccount.AccountNum, debitAccount.Balance, false);
+                                                        debitAccount.AccountNum, debitAccount.Balance,
+                                                        false);
                 }
                 else
                 {
