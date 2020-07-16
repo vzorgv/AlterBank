@@ -5,8 +5,15 @@
     using Autofac;
     using MediatR;
 
+    /// <summary>
+    /// The mediator module configuration
+    /// </summary>
     public class MediatorModule : Autofac.Module
     {
+        /// <summary>
+        /// Loads module configuration
+        /// </summary>
+        /// <param name="builder">Container builder</param>
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterAssemblyTypes(typeof(IMediator).GetTypeInfo().Assembly)

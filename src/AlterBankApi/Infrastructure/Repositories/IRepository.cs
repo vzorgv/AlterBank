@@ -6,7 +6,7 @@
     /// <summary>
     /// Repository declaration
     /// </summary>
-    /// <typeparam name="TEntity">The entity of type T</T></typeparam>
+    /// <typeparam name="TEntity">The entity of specific type></typeparam>
     public interface IRepository<TEntity>
     {
         /// <summary>

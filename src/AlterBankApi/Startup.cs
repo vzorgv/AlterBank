@@ -1,5 +1,6 @@
 namespace AlterBankApi
 {
+    using System.IO;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
@@ -10,19 +11,35 @@ namespace AlterBankApi
     using Autofac;
     using AlterBankApi.Infrastructure;
 
-    using System.IO;
-
+    /// <summary>
+    /// Startup
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="configuration"></param>
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
+        /// <summary>
+        /// configuratio
+        /// </summary>
         public IConfiguration Configuration { get; }
+        
+        /// <summary>
+        /// container
+        /// </summary>
         public ILifetimeScope AutofacContainer { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services">services</param>
+
         public void ConfigureServices(IServiceCollection services)
         {
             services
@@ -44,13 +61,20 @@ namespace AlterBankApi
             });
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule(new ApplicationModule());
             builder.RegisterModule(new MediatorModule());
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

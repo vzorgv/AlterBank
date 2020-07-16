@@ -161,7 +161,11 @@
             Balance
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "P:AlterBankApi.Application.Responses.FundTransferResponse.AccountNumCredit" -->
+        <member name="P:AlterBankApi.Application.Responses.FundTransferResponse.AccountNumCredit">
+            <summary>
+            Deposited account number
+            </summary>
+        </member>
         <member name="P:AlterBankApi.Application.Responses.FundTransferResponse.BalanceCredit">
             <summary>
             Balance
@@ -184,7 +188,7 @@
         </member>
         <member name="T:AlterBankApi.Controllers.AccountController">
             <summary>
-            Account controller
+            The Account controller
             </summary>
         </member>
         <member name="M:AlterBankApi.Controllers.AccountController.#ctor(MediatR.IMediator)">
@@ -234,12 +238,127 @@
              <response code="201">Returns the newly created Account</response>
              <response code="400">If the item is not created</response>
         </member>
+        <member name="T:AlterBankApi.Controllers.FundController">
+            <summary>
+            The Fund controller
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Controllers.FundController.#ctor(MediatR.IMediator)">
+            <summary>
+            Constructs <c>FundController</c> instance
+            </summary>
+            <param name="mediator">The mediator insatnce</param>
+        </member>
+        <member name="M:AlterBankApi.Controllers.FundController.Transfer(AlterBankApi.Application.Commands.FundTransferCommand)">
+            <summary>
+            Transfers amount between two accounts
+            </summary>
+            <remarks>
+            
+                POST /transfer
+                {
+                    "accountNumDebit": "1234567890",
+                    "accountNumCredit": "0987654321",
+                    amount: 100.00
+                }
+            </remarks>
+            <param name="fundTransferCommand">The transfer command</param>
+            <returns>The transfer result</returns>
+            <response code="200">Returns the result of tranfer</response>
+            <response code="503">If the item is service temporary unavailable due to overload</response>
+        </member>
+        <member name="T:AlterBankApi.Infrastructure.ApplicationModule">
+            <summary>
+            Modue to configure application parts
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.ApplicationModule.Load(Autofac.ContainerBuilder)">
+            <summary>
+            Loads applcation container config
+            </summary>
+            <param name="builder">Builder</param>
+        </member>
+        <member name="T:AlterBankApi.Infrastructure.IDatabaseConnectionFactory">
+            <summary>
+            Declares factory to create connection to database
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.IDatabaseConnectionFactory.CreateConnectionAsync">
+            <summary>
+            Creates connection to database
+            </summary>
+            <returns>The <c>IDbConnection</c> implementation</returns>
+        </member>
+        <member name="T:AlterBankApi.Infrastructure.MediatorModule">
+            <summary>
+            The mediator module configuration
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.MediatorModule.Load(Autofac.ContainerBuilder)">
+            <summary>
+            Loads module configuration
+            </summary>
+            <param name="builder">Container builder</param>
+        </member>
         <member name="T:AlterBankApi.Infrastructure.Repositories.AccountRepository">
             <summary>
             Implemnts repository for <c>Account</c> entity
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "T:AlterBankApi.Infrastructure.Repositories.IRepository`1" -->
+        <member name="M:AlterBankApi.Infrastructure.Repositories.AccountRepository.#ctor(System.Data.IDbConnection,System.Data.IDbTransaction)">
+            <summary>
+            Constructs the <c>AccountRepositry</c> instance
+            </summary>
+            <param name="dbConnection">Connection to database</param>
+            <param name="dbTransaction">Thet transaction. Can be null if not open explicitly</param>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.Repositories.AccountRepository.#ctor(System.Data.IDbConnection)">
+            <summary>
+            Constructs the <c>AccountRepositry</c> instance
+            </summary>
+            <param name="dbConnection">Connection to database</param>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.Repositories.AccountRepository.Read">
+            <summary>
+            Read opearion
+            </summary>
+            <returns>List of Accounts</returns>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.Repositories.AccountRepository.ReadById(System.String)">
+            <summary>
+            Finds account by its number
+            </summary>
+            <param name="accountNum">The account number</param>
+            <returns>The account or null if not exist</returns>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.Repositories.AccountRepository.Create(AlterBankApi.Application.Model.Account)">
+            <summary>
+            Creates account
+            </summary>
+            <param name="account">The account to create</param>
+            <returns>Newly created account or null if exists</returns>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.Repositories.AccountRepository.Update(AlterBankApi.Application.Model.Account)">
+            <summary>
+            Updates account
+            </summary>
+            <param name="account">The account</param>
+            <returns>Updated account</returns>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.Repositories.AccountRepository.UpdateBalancePair(AlterBankApi.Application.Model.Account,AlterBankApi.Application.Model.Account)">
+            <summary>
+            Updates pair of accounts at once
+            </summary>
+            <param name="accountCredit">Credit account</param>
+            <param name="accountDebit">Debit account</param>
+            <returns>None or throws Sql exceptionn </returns>
+        </member>
+        <member name="T:AlterBankApi.Infrastructure.Repositories.IRepository`1">
+            <summary>
+            Repository declaration
+            </summary>
+            <typeparam name="TEntity">The entity of specific type></typeparam>
+        </member>
         <member name="M:AlterBankApi.Infrastructure.Repositories.IRepository`1.Read">
             <summary>
             Reads all entities
@@ -266,6 +385,86 @@
             </summary>
             <param name="entity">Entity to be updated</param>
             <returns>Updated entity</returns>
+        </member>
+        <member name="T:AlterBankApi.Infrastructure.SqlServerConnectionFactory">
+            <summary>
+            Implements connection factory to SQL server
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.SqlServerConnectionFactory.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Extensions.Logging.ILogger{AlterBankApi.Infrastructure.SqlServerConnectionFactory})">
+            <summary>
+            Constructs connection factory
+            </summary>
+            <param name="configuration">The configuration</param>
+            <param name="logger">The logger</param>
+        </member>
+        <member name="M:AlterBankApi.Infrastructure.SqlServerConnectionFactory.CreateConnectionAsync">
+            <summary>
+            Creates connection asynchoniously
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:AlterBankApi.Program">
+            <summary>
+            Program
+            </summary>
+        </member>
+        <member name="F:AlterBankApi.Program.Namespace">
+            <summary>
+            The basic namespace
+            </summary>
+        </member>
+        <member name="F:AlterBankApi.Program.AppName">
+            <summary>
+            The application name
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Program.Main(System.String[])">
+            <summary>
+            Main
+            </summary>
+            <param name="args">args</param>
+            <returns>result</returns>
+        </member>
+        <member name="T:AlterBankApi.Startup">
+            <summary>
+            Startup
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Startup.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            ctor
+            </summary>
+            <param name="configuration"></param>
+        </member>
+        <member name="P:AlterBankApi.Startup.Configuration">
+            <summary>
+            configuratio
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Startup.AutofacContainer">
+            <summary>
+            container
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            This method gets called by the runtime. Use this method to add services to the container.
+            </summary>
+            <param name="services">services</param>
+        </member>
+        <member name="M:AlterBankApi.Startup.ConfigureContainer(Autofac.ContainerBuilder)">
+            <summary>
+            
+            </summary>
+            <param name="builder"></param>
+        </member>
+        <member name="M:AlterBankApi.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            
+            </summary>
+            <param name="app"></param>
+            <param name="env"></param>
         </member>
     </members>
 </doc>

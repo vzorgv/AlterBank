@@ -22,7 +22,7 @@ namespace AlterBankApi.Application.Responses
         /// </summary>
         public decimal BalanceDebit { get; }
 
-        // <summary>
+        /// <summary>
         /// Deposited account number
         /// </summary>
         public string AccountNumCredit { get; }

@@ -13,7 +13,7 @@
     using AlterBankApi.Application.Model;
 
     /// <summary>
-    /// Account controller
+    /// The Account controller
     /// </summary>
     [Route("api/v1/[controller]")]
     [Produces("application/json")]

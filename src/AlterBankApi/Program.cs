@@ -13,14 +13,29 @@ namespace AlterBankApi
     using Microsoft.Extensions.Logging;
     using Serilog;
 
+    /// <summary>
+    /// Program
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// The basic namespace
+        /// </summary>
         public static readonly string Namespace = typeof(Program).Namespace;
+        
+        /// <summary>
+        /// The application name
+        /// </summary>
         public static readonly string AppName = Namespace;
 
         private const string AppSettingsFileName = "appsettings.json";
         private const string AppContextLogName = "ApplicationContext";
 
+        /// <summary>
+        /// Main
+        /// </summary>
+        /// <param name="args">args</param>
+        /// <returns>result</returns>
         public static int Main(string[] args)
         {
             var configuration = GetConfiguration();
