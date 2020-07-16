@@ -1,6 +1,4 @@
-﻿using AlterBankApi.Application.Model;
-
-namespace AlterBankApi.Application.Responses
+﻿namespace AlterBankApi.Application.Responses
 {
     /// <summary>
     /// The result of transfer command
@@ -31,11 +29,6 @@ namespace AlterBankApi.Application.Responses
         /// Balance
         /// </summary>
         public decimal BalanceCredit { get; }
-
-        /// <summary>
-        /// Deposited account
-        /// </summary>
-        public Account AccountCredit { get; }
 
         /// <summary>
         /// Constructs the <c>FundTransferResponse</c> instance

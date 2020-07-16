@@ -171,11 +171,6 @@
             Balance
             </summary>
         </member>
-        <member name="P:AlterBankApi.Application.Responses.FundTransferResponse.AccountCredit">
-            <summary>
-            Deposited account
-            </summary>
-        </member>
         <member name="M:AlterBankApi.Application.Responses.FundTransferResponse.#ctor(System.String,System.Decimal,System.String,System.Decimal,System.Boolean)">
             <summary>
             Constructs the <c>FundTransferResponse</c> instance
