@@ -33,8 +33,8 @@
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{&#xd;
-    &quot;accountNumDebit&quot;: &quot;LoadAccoun&quot;,&#xd;
-    &quot;accountNumCredit&quot;: &quot;12345&quot;,&#xd;
+    &quot;accountNumDebit&quot;: &quot;AccountDt&quot;,&#xd;
+    &quot;accountNumCredit&quot;: &quot;AccountCt&quot;,&#xd;
     &quot;amount&quot;: 1.0&#xd;
 }</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
