@@ -81,7 +81,6 @@
                         if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
                         {
                             debitAccount.Balance = CalcBalanceDebit(debitAccount, transferAmount);
-                            //TODO someone committed here in another connection
                             creditAccount.Balance = CalcBalnceCredit(creditAccount, transferAmount);
 
                             await repository.UpdateBalancePair(creditAccount, debitAccount);
