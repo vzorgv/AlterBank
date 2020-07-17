@@ -66,7 +66,7 @@
             </summary>
             <param name="request">The command</param>
             <param name="cancellationToken">Cancellation token</param>
-            <returns>Result of command execution as <c>Account</c> instance or null if account exist</returns>
+            <returns>Result of command execution</returns>
         </member>
         <member name="M:AlterBankApi.Application.Handlers.AccountCommandHandler.Handle(AlterBankApi.Application.Commands.FundTransferCommand,System.Threading.CancellationToken)">
             <summary>
@@ -75,7 +75,7 @@
             <param name="request">The command</param>
             <param name="cancellationToken">Cancellation token</param>
             <returns>
-            Result of command execution as <c>FundTransferResponse</c> instance or null in case of concurency exception cought 
+            Result of command execution 
             </returns>
         </member>
         <member name="T:AlterBankApi.Application.Handlers.AccountRequestHandler">
@@ -103,7 +103,7 @@
             </summary>
             <param name="request">The request</param>
             <param name="cancellationToken">The cancellation token</param>
-            <returns>The account if exit or null otherwise</returns>
+            <returns>Execution result</returns>
         </member>
         <member name="T:AlterBankApi.Application.Model.Account">
             <summary>
@@ -140,6 +140,41 @@
             <summary>
             Request to get list of accounts
             </summary>
+        </member>
+        <member name="T:AlterBankApi.Application.Responses.ExecutionResult`1">
+            <summary>
+            The execution result
+            </summary>
+            <typeparam name="TData">Content</typeparam>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.ExecutionResult`1.Data">
+            <summary>
+            Content of response
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.ExecutionResult`1.IsError">
+            <summary>
+            Declares whether response is error.
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.ExecutionResult`1.ErrorMessage">
+            <summary>
+            Error message
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Application.Responses.ExecutionResult`1.#ctor(`0,System.Boolean,System.String)">
+            <summary>
+            Constructor for response
+            </summary>
+            <param name="data">Data</param>
+            <param name="isError">Is error</param>
+            <param name="errorMessage">Error message</param>
+        </member>
+        <member name="M:AlterBankApi.Application.Responses.ExecutionResult`1.#ctor(`0)">
+            <summary>
+            Constructor for successful execution
+            </summary>
+            <param name="data">Data</param>
         </member>
         <member name="T:AlterBankApi.Application.Responses.FundTransferResponse">
             <summary>
@@ -190,7 +225,7 @@
             <summary>
             Constructs <c>AccountController</c> instance
             </summary>
-            <param name="mediator"></param>
+            <param name="mediator">The mediator</param>
         </member>
         <member name="M:AlterBankApi.Controllers.AccountController.GetListOfAccountsAsync">
             <summary>
@@ -231,7 +266,7 @@
              <param name="account">The account</param>
              <returns>New created Account</returns>
              <response code="201">Returns the newly created Account</response>
-             <response code="400">If the item exists</response>
+             <response code="400">If account exists</response>
         </member>
         <member name="T:AlterBankApi.Controllers.FundController">
             <summary>
@@ -254,7 +289,7 @@
                 {
                     "accountNumDebit": "1234567890",
                     "accountNumCredit": "0987654321",
-                    amount: 100.00
+                    "amount": 100.00
                 }
             </remarks>
             <param name="fundTransferCommand">The transfer command</param>

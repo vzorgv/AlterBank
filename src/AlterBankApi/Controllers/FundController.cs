@@ -39,19 +39,26 @@
         ///     {
         ///         "accountNumDebit": "1234567890",
         ///         "accountNumCredit": "0987654321",
-        ///         amount: 100.00
+        ///         "amount": 100.00
         ///     }
         /// </remarks>
         /// <param name="fundTransferCommand">The transfer command</param>
         /// <returns>The transfer result</returns>
         /// <response code="200">Returns the result of tranfer</response>
         /// <response code="503">If the item is service temporary unavailable due to overload</response>
+        /// <response code="400">Error in request</response>
         [HttpPost("transfer")]
         [ProducesResponseType((int)HttpStatusCode.ServiceUnavailable)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(FundTransferResponse), (int)HttpStatusCode.OK)]
         public async Task <ActionResult<FundTransferResponse>> Transfer([FromBody, Required] FundTransferCommand fundTransferCommand)
         {
-            return await _mediator.SendWithActionResult(fundTransferCommand, result => Ok(result), result => new StatusCodeResult((int)HttpStatusCode.ServiceUnavailable));
+            return await _mediator.SendWithActionResult(fundTransferCommand, 
+                result => Ok(result),
+                result =>
+                {
+                    return new StatusCodeResult((int)HttpStatusCode.ServiceUnavailable);
+                });
         }
     }
 }

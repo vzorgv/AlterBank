@@ -2,11 +2,12 @@
 {
     using MediatR;
     using AlterBankApi.Application.Model;
+    using AlterBankApi.Application.Responses;
 
     /// <summary>
     /// Comand to create Account
     /// </summary>
-    public sealed class CreateAccountCommand : IRequest<Account>
+    public sealed class CreateAccountCommand : IRequest<ExecutionResult<Account>>
     {
         /// <summary>
         /// Account to create

@@ -25,7 +25,7 @@
         /// <summary>
         /// Constructs <c>AccountController</c> instance
         /// </summary>
-        /// <param name="mediator"></param>
+        /// <param name="mediator">The mediator</param>
         public AccountController(IMediator mediator)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
@@ -68,7 +68,7 @@
         {
              return await _mediator.SendWithActionResult(new GetAccountRequestById(accountNum),
                 result => Ok(result.Balance),
-                result => NotFound());
+                result => NotFound(result.ErrorMessage));
         }
 
         /// <summary>
@@ -86,7 +86,7 @@
         /// <param name="account">The account</param>
         /// <returns>New created Account</returns>
         /// <response code="201">Returns the newly created Account</response>
-        /// <response code="400">If the item exists</response>
+        /// <response code="400">If account exists</response>
         [HttpPost("create")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(Account), (int)HttpStatusCode.Created)]
@@ -94,7 +94,7 @@
         {
             return await _mediator.SendWithActionResult(new CreateAccountCommand(account),
                 result => Created(string.Empty, result),
-                result => BadRequest());
+                result => BadRequest(result.ErrorMessage));
         }
     }
 }

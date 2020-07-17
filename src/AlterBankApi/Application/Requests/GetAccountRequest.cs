@@ -2,11 +2,12 @@
 {
     using MediatR;
     using AlterBankApi.Application.Model;
+    using AlterBankApi.Application.Responses;
 
     /// <summary>
     /// The request to get <c>Account</c> by its number
     /// </summary>
-    public sealed class GetAccountRequestById : IRequest<Account>
+    public sealed class GetAccountRequestById : IRequest<ExecutionResult<Account>>
     {
         /// <summary>
         /// The account number

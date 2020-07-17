@@ -17,8 +17,8 @@
     /// Handles commands which midify account state
     /// </summary>
     public class AccountCommandHandler :
-        IRequestHandler<CreateAccountCommand, Account>,
-        IRequestHandler<FundTransferCommand, FundTransferResponse>
+        IRequestHandler<CreateAccountCommand, ExecutionResult<Account>>,
+        IRequestHandler<FundTransferCommand, ExecutionResult<FundTransferResponse>>
     {
         private readonly IDatabaseConnectionFactory _dbConnectionFactory;
         private readonly ILogger<AccountCommandHandler> _logger;
@@ -39,8 +39,8 @@
         /// </summary>
         /// <param name="request">The command</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Result of command execution as <c>Account</c> instance or null if account exist</returns>
-        public async Task<Account> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
+        /// <returns>Result of command execution</returns>
+        public async Task<ExecutionResult<Account>> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
         {
             Account account;
 
@@ -51,7 +51,7 @@
                 throw new ArgumentNullException(nameof(request.Account));
 
             if (request.Account.Balance < 0)
-                return null;
+                return new ExecutionResult<Account>(null, true, "Balance must be equal or great 0"); ;
 
             try
             {
@@ -63,12 +63,12 @@
             {
                 // PK duplication exception
                 if (ex.Number == 2627)
-                    return null;
+                    return new ExecutionResult<Account>(null, true, "Account already exist");
                 else
                     throw;
             }
 
-            return account;
+            return new ExecutionResult<Account>(account);
         }
 
         /// <summary>
@@ -77,9 +77,9 @@
         /// <param name="request">The command</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>
-        /// Result of command execution as <c>FundTransferResponse</c> instance or null in case of concurency exception cought 
+        /// Result of command execution 
         /// </returns>
-        public async Task<FundTransferResponse> Handle(FundTransferCommand request, CancellationToken cancellationToken)
+        public async Task<ExecutionResult<FundTransferResponse>> Handle(FundTransferCommand request, CancellationToken cancellationToken)
         {
             bool transferResult = false;
             Account debitAccount = null;
@@ -111,6 +111,11 @@
                             transferResult = true;
                         }
                     }
+                    else
+                    {
+                        return new ExecutionResult<FundTransferResponse>(null, true, "One of the account not exist");
+                    }
+                    
                     transaction.Commit();
                 }
 
@@ -122,7 +127,7 @@
             {
                 if (IsConcurencySnapshotUpdateException(ex))
                 {
-                    response = null;
+                    return new ExecutionResult<FundTransferResponse>(null, true, "One of the accounts you are being update is modified by another transaction");
                 }
                 else
                 {
@@ -130,7 +135,7 @@
                 }
             }
 
-            return response;
+            return new ExecutionResult<FundTransferResponse>(response);
         }
 
         private bool IsConcurencySnapshotUpdateException(SqlException exeption)

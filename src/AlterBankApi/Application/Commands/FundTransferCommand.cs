@@ -7,7 +7,7 @@
     /// <summary>
     /// Command to fund transfer
     /// </summary>
-    public sealed class FundTransferCommand : IRequest<FundTransferResponse>
+    public sealed class FundTransferCommand : IRequest<ExecutionResult<FundTransferResponse>>
     {
         /// <summary>
         /// The account to be withdrawn

@@ -17,8 +17,8 @@
     /// Handler of requests to Account
     /// </summary>
     public class AccountRequestHandler :
-        IRequestHandler<GetAccountRequestById, Account>,
-        IRequestHandler<GetListOfAccountsRequest, IEnumerable<Account>>
+        IRequestHandler<GetAccountRequestById, ExecutionResult<Account>>,
+        IRequestHandler<GetListOfAccountsRequest, ExecutionResult<IEnumerable<Account>>>
     {
         private readonly IDatabaseConnectionFactory _dbConnectionFactory;
 
@@ -37,14 +37,14 @@
         /// <param name="request">The request</param>
         /// <param name="cancellationToken">The cancellation token</param>
         /// <returns>The list account accounts</returns>
-        public async Task<IEnumerable<Account>> Handle(GetListOfAccountsRequest request, CancellationToken cancellationToken)
+        public async Task<ExecutionResult<IEnumerable<Account>>> Handle(GetListOfAccountsRequest request, CancellationToken cancellationToken)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             var repository = new AccountRepository(connection);
 
             var result = await repository.Read();
 
-            return result.ToList();
+            return new ExecutionResult<IEnumerable<Account>>(result.ToList());
         }
 
         /// <summary>
@@ -52,13 +52,18 @@
         /// </summary>
         /// <param name="request">The request</param>
         /// <param name="cancellationToken">The cancellation token</param>
-        /// <returns>The account if exit or null otherwise</returns>
-        public async Task<Account> Handle(GetAccountRequestById request, CancellationToken cancellationToken)
+        /// <returns>Execution result</returns>
+        public async Task<ExecutionResult<Account>> Handle(GetAccountRequestById request, CancellationToken cancellationToken)
         {
             using var connection = await _dbConnectionFactory.CreateConnectionAsync();
             var repository = new AccountRepository(connection);
+            
+            var account = await repository.ReadById(request.AccountNum);
 
-            return await repository.ReadById(request.AccountNum);
+            if (account == null)
+                return new ExecutionResult<Account>(null, true, $"Account {request.AccountNum} not found");
+
+            return new ExecutionResult<Account>(account);
         }
     }
 }
