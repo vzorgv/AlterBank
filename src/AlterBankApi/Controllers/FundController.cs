@@ -48,9 +48,9 @@
         /// <response code="400">Error in request</response>
         /// <response code="503">If the item is service temporary unavailable due to overload or account locked</response>
         [HttpPost("transfer")]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.ServiceUnavailable)]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(FundTransferResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.ServiceUnavailable)]
         public async Task <ActionResult<FundTransferResponse>> Transfer([FromBody, Required] FundTransferCommand fundTransferCommand)
         {
             return await _mediator.SendWithActionResult(fundTransferCommand,
