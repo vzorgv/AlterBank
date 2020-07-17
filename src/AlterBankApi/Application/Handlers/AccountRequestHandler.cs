@@ -6,7 +6,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using MediatR;
-    using Microsoft.Extensions.Logging;
     using AlterBankApi.Application.Model;
     using AlterBankApi.Application.Requests;
     using AlterBankApi.Application.Responses;
@@ -61,7 +60,7 @@
             var account = await repository.ReadById(request.AccountNum);
 
             if (account == null)
-                return new ExecutionResult<Account>(null, true, $"Account {request.AccountNum} not found");
+                return new ExecutionResult<Account>(new AccountNotExistDescription($"Account {request.AccountNum} not found"));
 
             return new ExecutionResult<Account>(account);
         }

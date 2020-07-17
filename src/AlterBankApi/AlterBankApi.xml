@@ -50,7 +50,7 @@
         </member>
         <member name="T:AlterBankApi.Application.Handlers.AccountCommandHandler">
             <summary>
-            Handles commands which midify account state
+            Handles commands which modify account state
             </summary>
         </member>
         <member name="M:AlterBankApi.Application.Handlers.AccountCommandHandler.#ctor(AlterBankApi.Infrastructure.IDatabaseConnectionFactory,Microsoft.Extensions.Logging.ILogger{AlterBankApi.Application.Handlers.AccountCommandHandler})">
@@ -141,11 +141,52 @@
             Request to get list of accounts
             </summary>
         </member>
+        <member name="T:AlterBankApi.Application.Responses.AccountIsLockedForUpdate">
+            <summary>
+            The locked account description
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.AccountIsLockedForUpdate.Message">
+            <summary>
+            Message
+            </summary>
+        </member>
+        <member name="T:AlterBankApi.Application.Responses.AccountNotExistDescription">
+            <summary>
+            Not found description
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.AccountNotExistDescription.Message">
+            <summary>
+            The result message
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Application.Responses.AccountNotExistDescription.#ctor(System.String)">
+            <summary>
+            Constructs <c>AccountNotFoundDescription</c> instance
+            </summary>
+            <param name="message">Error message</param>
+        </member>
+        <member name="T:AlterBankApi.Application.Responses.AccountNotInValidStateDescription">
+            <summary>
+            Represnt the not valid state of <c>Account</c> entity description
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.AccountNotInValidStateDescription.Message">
+            <summary>
+            The result message
+            </summary>
+        </member>
+        <member name="M:AlterBankApi.Application.Responses.AccountNotInValidStateDescription.#ctor(System.String)">
+            <summary>
+            Constructs <c>NotValidAccountStateDescription</c> instance
+            </summary>
+            <param name="message">Error message</param>
+        </member>
         <member name="T:AlterBankApi.Application.Responses.ExecutionResult`1">
             <summary>
-            The execution result
+            The execution result base implementation
             </summary>
-            <typeparam name="TData">Content</typeparam>
         </member>
         <member name="P:AlterBankApi.Application.Responses.ExecutionResult`1.Data">
             <summary>
@@ -157,24 +198,30 @@
             Declares whether response is error.
             </summary>
         </member>
-        <member name="P:AlterBankApi.Application.Responses.ExecutionResult`1.ErrorMessage">
+        <member name="P:AlterBankApi.Application.Responses.ExecutionResult`1.Description">
             <summary>
-            Error message
+            Description
             </summary>
         </member>
-        <member name="M:AlterBankApi.Application.Responses.ExecutionResult`1.#ctor(`0,System.Boolean,System.String)">
+        <member name="M:AlterBankApi.Application.Responses.ExecutionResult`1.#ctor(`0,System.Boolean,AlterBankApi.Application.Responses.IExecutionResultDescription)">
             <summary>
             Constructor for response
             </summary>
             <param name="data">Data</param>
             <param name="isError">Is error</param>
-            <param name="errorMessage">Error message</param>
+            <param name="description">Description</param>
         </member>
         <member name="M:AlterBankApi.Application.Responses.ExecutionResult`1.#ctor(`0)">
             <summary>
-            Constructor for successful execution
+            Constructor with data only
             </summary>
             <param name="data">Data</param>
+        </member>
+        <member name="M:AlterBankApi.Application.Responses.ExecutionResult`1.#ctor(AlterBankApi.Application.Responses.IExecutionResultDescription)">
+            <summary>
+            Constructor with error
+            </summary>
+            <param name="errorDescription">Error description</param>
         </member>
         <member name="T:AlterBankApi.Application.Responses.FundTransferResponse">
             <summary>
@@ -215,6 +262,16 @@
             <param name="accountNumDebit">Debit account numebr</param>
             <param name="balanceDebit">Balance</param>
             <param name="isSuccess">Transfer result</param>
+        </member>
+        <member name="T:AlterBankApi.Application.Responses.IExecutionResultDescription">
+            <summary>
+            Description of result
+            </summary>
+        </member>
+        <member name="P:AlterBankApi.Application.Responses.IExecutionResultDescription.Message">
+            <summary>
+            Result message
+            </summary>
         </member>
         <member name="T:AlterBankApi.Controllers.AccountController">
             <summary>
@@ -295,7 +352,8 @@
             <param name="fundTransferCommand">The transfer command</param>
             <returns>The transfer result</returns>
             <response code="200">Returns the result of tranfer</response>
-            <response code="503">If the item is service temporary unavailable due to overload</response>
+            <response code="400">Error in request</response>
+            <response code="503">If the item is service temporary unavailable due to overload or account locked</response>
         </member>
         <member name="T:AlterBankApi.Infrastructure.ApplicationModule">
             <summary>

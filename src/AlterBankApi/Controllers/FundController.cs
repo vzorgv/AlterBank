@@ -45,19 +45,22 @@
         /// <param name="fundTransferCommand">The transfer command</param>
         /// <returns>The transfer result</returns>
         /// <response code="200">Returns the result of tranfer</response>
-        /// <response code="503">If the item is service temporary unavailable due to overload</response>
         /// <response code="400">Error in request</response>
+        /// <response code="503">If the item is service temporary unavailable due to overload or account locked</response>
         [HttpPost("transfer")]
         [ProducesResponseType((int)HttpStatusCode.ServiceUnavailable)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(FundTransferResponse), (int)HttpStatusCode.OK)]
         public async Task <ActionResult<FundTransferResponse>> Transfer([FromBody, Required] FundTransferCommand fundTransferCommand)
         {
-            return await _mediator.SendWithActionResult(fundTransferCommand, 
+            return await _mediator.SendWithActionResult(fundTransferCommand,
                 result => Ok(result),
                 result =>
                 {
-                    return new StatusCodeResult((int)HttpStatusCode.ServiceUnavailable);
+                    if (result.Description is AccountIsLockedForUpdate)
+                        return StatusCode((int)HttpStatusCode.ServiceUnavailable, result.Description.Message);
+                    else
+                        return BadRequest(result.Description.Message);
                 });
         }
     }

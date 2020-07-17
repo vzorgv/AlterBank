@@ -14,9 +14,9 @@
     using System.Data.SqlClient;
 
     /// <summary>
-    /// Handles commands which midify account state
+    /// Handles commands which modify account state
     /// </summary>
-    public class AccountCommandHandler :
+     public class AccountCommandHandler :
         IRequestHandler<CreateAccountCommand, ExecutionResult<Account>>,
         IRequestHandler<FundTransferCommand, ExecutionResult<FundTransferResponse>>
     {
@@ -51,7 +51,7 @@
                 throw new ArgumentNullException(nameof(request.Account));
 
             if (request.Account.Balance < 0)
-                return new ExecutionResult<Account>(null, true, "Balance must be equal or great 0"); ;
+                return new ExecutionResult<Account>(new AccountNotInValidStateDescription("Balance must be equal or great zero"));
 
             try
             {
@@ -61,9 +61,9 @@
             }
             catch (SqlException ex)
             {
-                // PK duplication exception
+                // PK duplication SQL server error number
                 if (ex.Number == 2627)
-                    return new ExecutionResult<Account>(null, true, "Account already exist");
+                    return new ExecutionResult<Account>(new AccountNotInValidStateDescription("Account already exist"));
                 else
                     throw;
             }
@@ -113,7 +113,7 @@
                     }
                     else
                     {
-                        return new ExecutionResult<FundTransferResponse>(null, true, "One of the account not exist");
+                        return new ExecutionResult<FundTransferResponse>(new AccountNotExistDescription("One of the accounts not exist"));
                     }
                     
                     transaction.Commit();
@@ -127,7 +127,7 @@
             {
                 if (IsConcurencySnapshotUpdateException(ex))
                 {
-                    return new ExecutionResult<FundTransferResponse>(null, true, "One of the accounts you are being update is modified by another transaction");
+                    return new ExecutionResult<FundTransferResponse>(new AccountIsLockedForUpdate());
                 }
                 else
                 {
@@ -140,6 +140,7 @@
 
         private bool IsConcurencySnapshotUpdateException(SqlException exeption)
         {
+            // The SQL server error codes
             return exeption.Number == 3960 && exeption.State == 5;
         }
 

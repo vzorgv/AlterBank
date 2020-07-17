@@ -68,7 +68,7 @@
         {
              return await _mediator.SendWithActionResult(new GetAccountRequestById(accountNum),
                 result => Ok(result.Balance),
-                result => NotFound(result.ErrorMessage));
+                result => NotFound(result.Description.Message));
         }
 
         /// <summary>
@@ -90,11 +90,12 @@
         [HttpPost("create")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(Account), (int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<Account>> CreateAsync([FromBody, Required] Account account)
         {
             return await _mediator.SendWithActionResult(new CreateAccountCommand(account),
                 result => Created(string.Empty, result),
-                result => BadRequest(result.ErrorMessage));
+                result => BadRequest(result.Description.Message));
         }
     }
 }
