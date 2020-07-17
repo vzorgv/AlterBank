@@ -5,7 +5,6 @@
     using AlterBankApi.Extensions;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.Net;
@@ -34,13 +33,14 @@
         /// Transfers amount between two accounts
         /// </summary>
         /// <remarks>
-        /// 
+        ///
         ///     POST /transfer
         ///     {
         ///         "accountNumDebit": "1234567890",
         ///         "accountNumCredit": "0987654321",
         ///         "amount": 100.00
         ///     }
+        ///
         /// </remarks>
         /// <param name="fundTransferCommand">The transfer command</param>
         /// <returns>The transfer result</returns>

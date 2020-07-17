@@ -337,23 +337,24 @@
             <param name="mediator">The mediator insatnce</param>
         </member>
         <member name="M:AlterBankApi.Controllers.FundController.Transfer(AlterBankApi.Application.Commands.FundTransferCommand)">
-            <summary>
-            Transfers amount between two accounts
-            </summary>
-            <remarks>
+             <summary>
+             Transfers amount between two accounts
+             </summary>
+             <remarks>
             
-                POST /transfer
-                {
-                    "accountNumDebit": "1234567890",
-                    "accountNumCredit": "0987654321",
-                    "amount": 100.00
-                }
-            </remarks>
-            <param name="fundTransferCommand">The transfer command</param>
-            <returns>The transfer result</returns>
-            <response code="200">Returns the result of tranfer</response>
-            <response code="400">Error in request</response>
-            <response code="503">If the item is service temporary unavailable due to overload or account locked</response>
+                 POST /transfer
+                 {
+                     "accountNumDebit": "1234567890",
+                     "accountNumCredit": "0987654321",
+                     "amount": 100.00
+                 }
+            
+             </remarks>
+             <param name="fundTransferCommand">The transfer command</param>
+             <returns>The transfer result</returns>
+             <response code="200">Returns the result of tranfer</response>
+             <response code="400">Error in request</response>
+             <response code="503">If the item is service temporary unavailable due to overload or account locked</response>
         </member>
         <member name="T:AlterBankApi.Infrastructure.ApplicationModule">
             <summary>
