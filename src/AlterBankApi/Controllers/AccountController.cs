@@ -86,7 +86,7 @@
         /// <param name="account">The account</param>
         /// <returns>New created Account</returns>
         /// <response code="201">Returns the newly created Account</response>
-        /// <response code="400">If the item is not created</response>
+        /// <response code="400">If the item exists</response>
         [HttpPost("create")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(Account), (int)HttpStatusCode.Created)]

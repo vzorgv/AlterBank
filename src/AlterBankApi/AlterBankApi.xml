@@ -62,11 +62,11 @@
         </member>
         <member name="M:AlterBankApi.Application.Handlers.AccountCommandHandler.Handle(AlterBankApi.Application.Commands.CreateAccountCommand,System.Threading.CancellationToken)">
             <summary>
-            Handles <c>OpenAccountCommand</c> command
+            Handles <c>CreateAccountCommand</c> command
             </summary>
             <param name="request">The command</param>
             <param name="cancellationToken">Cancellation token</param>
-            <returns>Result of command execution as <c>OpenAccountResponse</c> instance</returns>
+            <returns>Result of command execution as <c>Account</c> instance or null if account exist</returns>
         </member>
         <member name="M:AlterBankApi.Application.Handlers.AccountCommandHandler.Handle(AlterBankApi.Application.Commands.FundTransferCommand,System.Threading.CancellationToken)">
             <summary>
@@ -231,7 +231,7 @@
              <param name="account">The account</param>
              <returns>New created Account</returns>
              <response code="201">Returns the newly created Account</response>
-             <response code="400">If the item is not created</response>
+             <response code="400">If the item exists</response>
         </member>
         <member name="T:AlterBankApi.Controllers.FundController">
             <summary>

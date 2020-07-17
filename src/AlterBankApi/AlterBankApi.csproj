@@ -9,6 +9,10 @@
     <DocumentationFile>C:\NetProjects\GitHubRepo\AlterBank\src\AlterBankApi\AlterBankApi.xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\NetProjects\GitHubRepo\AlterBank\src\AlterBankApi\AlterBankApi.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Dapper" Version="2.0.35" />

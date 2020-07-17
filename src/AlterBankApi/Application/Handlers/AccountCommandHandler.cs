@@ -35,17 +35,40 @@
         }
 
         /// <summary>
-        /// Handles <c>OpenAccountCommand</c> command
+        /// Handles <c>CreateAccountCommand</c> command
         /// </summary>
         /// <param name="request">The command</param>
         /// <param name="cancellationToken">Cancellation token</param>
-        /// <returns>Result of command execution as <c>OpenAccountResponse</c> instance</returns>
+        /// <returns>Result of command execution as <c>Account</c> instance or null if account exist</returns>
         public async Task<Account> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
         {
-            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
-            var repository = new AccountRepository(connection);
+            Account account;
 
-            return await repository.Create(request.Account);
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            if (request.Account == null)
+                throw new ArgumentNullException(nameof(request.Account));
+
+            if (request.Account.Balance < 0)
+                return null;
+
+            try
+            {
+                using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+                var repository = new AccountRepository(connection);
+                account = await repository.Create(request.Account);
+            }
+            catch (SqlException ex)
+            {
+                // PK duplication exception
+                if (ex.Number == 2627)
+                    return null;
+                else
+                    throw;
+            }
+
+            return account;
         }
 
         /// <summary>
