@@ -13,7 +13,7 @@
     public class SqlServerConnectionFactory : IDatabaseConnectionFactory
     {
         private readonly string _connectionString;
-        private const string ConnectionStringName = "AlterDB";
+        private const string ConnectionStringName = "ALTERDB";
 
         private readonly ILogger<SqlServerConnectionFactory> _logger;
 

@@ -1,0 +1,24 @@
+version: '3.4'
+
+services:
+  alterbank-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CONNECTIONSTRING=${ALTERDB:-Server=192.168.1.65; Database=AlterBank; Integrated Security=False; User id=sa; Password=Pa74word2020;Max Pool Size=32767;Pooling=true;Connection Timeout=30"}
+    ports:
+      - "80"
+  sqldata:
+    environment:
+      - SA_PASSWORD=Pa74word2020
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Evaluation
+    ports:
+      - "5433:1433"
+    volumes:
+      - alterbank_data:/var/opt/mssql
+
+
+
+volumes:
+  alterbank-data:
+    external: false
