@@ -342,7 +342,7 @@
              </summary>
              <remarks>
             
-                 POST /transfer
+                 POST/transfer
                  {
                      "accountNumDebit": "1234567890",
                      "accountNumCredit": "0987654321",

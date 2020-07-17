@@ -88,9 +88,8 @@
         /// <response code="201">Returns the newly created Account</response>
         /// <response code="400">If account exists</response>
         [HttpPost("create")]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(Account), (int)HttpStatusCode.Created)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<Account>> CreateAsync([FromBody, Required] Account account)
         {
             return await _mediator.SendWithActionResult(new CreateAccountCommand(account),

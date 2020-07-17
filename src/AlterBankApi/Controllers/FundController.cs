@@ -34,7 +34,7 @@
         /// </summary>
         /// <remarks>
         ///
-        ///     POST /transfer
+        ///     POST/transfer
         ///     {
         ///         "accountNumDebit": "1234567890",
         ///         "accountNumCredit": "0987654321",
@@ -48,8 +48,8 @@
         /// <response code="400">Error in request</response>
         /// <response code="503">If the item is service temporary unavailable due to overload or account locked</response>
         [HttpPost("transfer")]
-        [ProducesResponseType((int)HttpStatusCode.ServiceUnavailable)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.ServiceUnavailable)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(FundTransferResponse), (int)HttpStatusCode.OK)]
         public async Task <ActionResult<FundTransferResponse>> Transfer([FromBody, Required] FundTransferCommand fundTransferCommand)
         {
