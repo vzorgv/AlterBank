@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   alterbank-api:
-    image: ${REGISTRY:-alterbank}/api:${TAG:-latest}
+    image: docker4dmitry/alterbank:${TAG:-latest}
     container_name: AlterBank_API
     build:
       context: .
