@@ -1,11 +1,12 @@
 USE [master]
 GO
 
-/****** Object:  Database [AlterBank]    Script Date: 17.07.2020 20:10:14 ******/
-DROP DATABASE [AlterBank]
-GO
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES
+           WHERE TABLE_NAME = N'AlterBank')
+	DROP DATABASE [AlterBank]
+END
 
-/****** Object:  Database [AlterBank]    Script Date: 17.07.2020 20:10:14 ******/
+
 CREATE DATABASE [AlterBank]
  CONTAINMENT = NONE
  ON  PRIMARY 

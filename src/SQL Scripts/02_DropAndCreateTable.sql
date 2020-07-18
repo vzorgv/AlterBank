@@ -1,15 +1,15 @@
 USE [AlterBank]
 GO
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AccountTable]') AND type in (N'U'))
 ALTER TABLE [dbo].[AccountTable] DROP CONSTRAINT [DF_AccountTable_Balance]
 GO
 
-/****** Object:  Table [dbo].[AccountTable]    Script Date: 17.07.2020 20:11:49 ******/
+
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AccountTable]') AND type in (N'U'))
 DROP TABLE [dbo].[AccountTable]
 GO
 
-/****** Object:  Table [dbo].[AccountTable]    Script Date: 17.07.2020 20:11:49 ******/
 SET ANSI_NULLS ON
 GO
 
