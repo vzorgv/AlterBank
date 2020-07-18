@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
+    using System.Net;
 
     /// <summary>
     /// Implements connection factory to SQL server
@@ -24,7 +25,7 @@
         public SqlServerConnectionFactory(IConfiguration configuration, ILogger<SqlServerConnectionFactory> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            
+
             if (configuration == null)
             {
                 throw new ArgumentNullException(nameof(configuration));
@@ -61,11 +62,6 @@
                 _logger.LogError(ex.Message);
                 throw new Exception(string.Format("SQL exception", GetType().FullName), ex);
             }
-        }
-
-        private string BuildConnectionString(IConfiguration configuration)
-        {
-            return string.Empty;
         }
     }
 }

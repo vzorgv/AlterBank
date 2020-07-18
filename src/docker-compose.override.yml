@@ -3,9 +3,14 @@ version: '3.7'
 services:
   alterbank-api:
     environment:
-      - DB_CONNECTION_STRING=Server=192.168.1.65,5433; Database=AlterBank; Integrated Security=False; User id=sa; Password=Pa74word2020;Max Pool Size=32767;Pooling=true;Connection Timeout=30
+    #  - DB_CONNECTION_STRING=Server=192.168.1.65,5433; Database=AlterBank; Integrated Security=False; User id=sa; Password=Pa74word2020;Max Pool Size=32767;Pooling=true;Connection Timeout=30
+      - DB_CONNECTION_STRING=Server=sqldata; Database=AlterBank; Integrated Security=False; User id=sa; Password=Pa74word2020;Max Pool Size=32767;Pooling=true;Connection Timeout=30
     ports:
       - "5000:80"
+    networks:
+      - alter_bank
+
+
   sqldata:
     environment:
       - SA_PASSWORD=Pa74word2020
@@ -15,10 +20,17 @@ services:
       - "5433:1433"
     volumes:
       - alterbank_data:/var/opt/mssql
+    networks:
+      - alter_bank
 
 
 
 volumes:
   alterbank_data: 
     external: false
+
+
+networks:
+  alter_bank:
+    driver: bridge
 
