@@ -13,8 +13,7 @@
     public class SqlServerConnectionFactory : IDatabaseConnectionFactory
     {
         private readonly string _connectionString;
-        private const string ConnectionStringName = "ALTERDB";
-
+        private const string EnvConnectionStringName = "DB_CONNECTION_STRING";
         private readonly ILogger<SqlServerConnectionFactory> _logger;
 
         /// <summary>
@@ -32,7 +31,7 @@
             }
             else
             {
-                _connectionString = configuration.GetConnectionString(ConnectionStringName);
+                _connectionString = configuration[EnvConnectionStringName];
             }
 
             if (string.IsNullOrEmpty(_connectionString))
@@ -62,6 +61,11 @@
                 _logger.LogError(ex.Message);
                 throw new Exception(string.Format("SQL exception", GetType().FullName), ex);
             }
+        }
+
+        private string BuildConnectionString(IConfiguration configuration)
+        {
+            return string.Empty;
         }
     }
 }

@@ -292,6 +292,8 @@
             GET /list
             </remarks>
             <returns>List of accounts</returns>
+            <response code="200">List of accounts</response>
+            <response code="404">Bad request</response>
         </member>
         <member name="M:AlterBankApi.Controllers.AccountController.GetBalanceAsync(System.String)">
             <summary>

@@ -38,14 +38,17 @@
         /// GET /list
         /// </remarks>
         /// <returns>List of accounts</returns>
+        /// <response code="200">List of accounts</response>
+        /// <response code="404">Bad request</response>
         [HttpGet]
         [Route("list")]
         [ProducesResponseType(typeof(IEnumerable<Account>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<IEnumerable<Account>>> GetListOfAccountsAsync()
         {
             return await _mediator.SendWithActionResult(new GetListOfAccountsRequest(),
                 result => Ok(result),
-                result => Ok());
+                result => StatusCode((int)HttpStatusCode.BadRequest));
         }
 
         /// <summary>
