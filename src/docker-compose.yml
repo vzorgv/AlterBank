@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   alterbank-api:
-    image: ${DOCKER_REGISTRY:-alterbankapi}-${TAG:-latest}
+    image: ${REGISTRY:-alterbank}/api:${TAG:-latest}
     container_name: AlterBank_API
     build:
       context: .
