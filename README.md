@@ -70,7 +70,7 @@ VM: vCPU 8, 32Gb, SSD, Ubuntu 18.04 LTS, docker 19.3, сompose 1.26.2
 * [Работа с БД](src/AlterBankApi/Infrastructure/Repositories)
 * [Контроллеры](src/AlterBankApi/Controllers)
 
-[Скрипты по созданию базы](src/SQLScripts)
+[Скрипты по созданию базы](src/SQL%20Scripts)
 
 [Тесты и заведение аккаунтов](ыкс/LoadTests)
 
@@ -93,7 +93,7 @@ VM: vCPU 8, 32Gb, SSD, Ubuntu 18.04 LTS, docker 19.3, сompose 1.26.2
 * Установить compose
 * Запустить docker up с файлами docker-compose.yml, docker-compose.override.yml [отсюда](src)
 * Подключиться к SQL серверу по порту [5433](src/docker-compose.override.yml) под пользователем sa (пароль [здесь](src/docker-compose.override.yml))
-* Запустить по очереди [скрипты](src/SQLScripts) (будет создана БД, таблица, хранимая процедура)
+* Запустить по очереди [скрипты](src/SQL%20Scripts) (будет создана БД, таблица, хранимая процедура)
 * Проверить готовность приложения http://\<host\>:[5000](src/docker-compose.override.yml)/swagger
  
  ### Заполнение таблицы тестовыми данными (опционально)
