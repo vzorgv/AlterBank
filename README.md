@@ -91,7 +91,7 @@ VM: vCPU 8, 32Gb, SSD, Ubuntu 18.04 LTS, docker 19.3, сompose 1.26.2
 ## Как развернуть приложение
 * Установить docker
 * Установить compose
-* Запустить docker up с файлами docker-compose.yml, docker-compose.override.yml [отсюда](src)
+* Запустить docker-compose up с файлами docker-compose.yml, docker-compose.override.yml [отсюда](src)
 * Подключиться к SQL серверу по порту [5433](src/docker-compose.override.yml) под пользователем sa (пароль [здесь](src/docker-compose.override.yml))
 * Запустить по очереди [скрипты](src/SQL%20Scripts) (будет создана БД, таблица, хранимая процедура)
 * Проверить готовность приложения http://\<host\>:[5000](src/docker-compose.override.yml)/swagger
