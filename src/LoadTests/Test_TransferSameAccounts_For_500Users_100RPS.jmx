@@ -26,6 +26,15 @@
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
       <hashTree>
+        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer" enabled="true">
+          <doubleProp>
+            <name>throughput</name>
+            <value>6000.0</value>
+            <savedValue>0.0</savedValue>
+          </doubleProp>
+          <intProp name="calcMode">2</intProp>
+        </ConstantThroughputTimer>
+        <hashTree/>
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="HTTP Request" enabled="true">
           <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
           <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
@@ -33,15 +42,15 @@
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 <stringProp name="Argument.value">{&#xd;
-    &quot;accountNumDebit&quot;: &quot;AAA&quot;,&#xd;
-    &quot;accountNumCredit&quot;: &quot;BBB&quot;,&#xd;
+    &quot;accountNumDebit&quot;:  &quot;0000010000&quot;,&#xd;
+    &quot;accountNumCredit&quot;: &quot;0000000001&quot;,&#xd;
     &quot;amount&quot;: 1.0&#xd;
 }</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="HTTPSampler.domain">84.201.130.151</stringProp>
+          <stringProp name="HTTPSampler.domain">84.201.132.28</stringProp>
           <stringProp name="HTTPSampler.port">5000</stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding">utf-8</stringProp>
@@ -74,15 +83,6 @@
           </HeaderManager>
           <hashTree/>
         </hashTree>
-        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer" enabled="true">
-          <doubleProp>
-            <name>throughput</name>
-            <value>6000.0</value>
-            <savedValue>0.0</savedValue>
-          </doubleProp>
-          <intProp name="calcMode">1</intProp>
-        </ConstantThroughputTimer>
-        <hashTree/>
         <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
