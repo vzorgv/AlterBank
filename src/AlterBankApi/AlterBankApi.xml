@@ -141,16 +141,6 @@
             Request to get list of accounts
             </summary>
         </member>
-        <member name="T:AlterBankApi.Application.Responses.AccountIsLockedForUpdate">
-            <summary>
-            The locked account description
-            </summary>
-        </member>
-        <member name="P:AlterBankApi.Application.Responses.AccountIsLockedForUpdate.Message">
-            <summary>
-            Message
-            </summary>
-        </member>
         <member name="T:AlterBankApi.Application.Responses.AccountNotExistDescription">
             <summary>
             Not found description
@@ -356,7 +346,7 @@
              <returns>The transfer result</returns>
              <response code="200">Returns the result of tranfer</response>
              <response code="400">Error in request</response>
-             <response code="503">If the item is service temporary unavailable due to overload or account locked</response>
+             <response code="404">Error in case if one of the accounts not found</response>
         </member>
         <member name="T:AlterBankApi.Infrastructure.ApplicationModule">
             <summary>
@@ -436,13 +426,14 @@
             <param name="account">The account</param>
             <returns>Updated account</returns>
         </member>
-        <member name="M:AlterBankApi.Infrastructure.Repositories.AccountRepository.UpdateBalancePair(AlterBankApi.Application.Model.Account,AlterBankApi.Application.Model.Account)">
+        <member name="M:AlterBankApi.Infrastructure.Repositories.AccountRepository.TransferAsync(System.String,System.String,System.Decimal)">
             <summary>
-            Updates pair of accounts at once
+            Updates pair of accounts at once with transfer amount
             </summary>
-            <param name="accountCredit">Credit account</param>
-            <param name="accountDebit">Debit account</param>
-            <returns>None or throws Sql exceptionn </returns>
+            <param name="accountNumCredit">Credit account number</param>
+            <param name="accountNumDebit">Debit account number</param>
+            <param name="amount">Transfer amount</param>
+            <returns>Pair of updated records if balance is allowed or empty collection otherwise </returns>
         </member>
         <member name="T:AlterBankApi.Infrastructure.Repositories.IRepository`1">
             <summary>

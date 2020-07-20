@@ -98,22 +98,43 @@
         }
 
         /// <summary>
-        /// Updates pair of accounts at once
+        /// Updates pair of accounts at once with transfer amount
         /// </summary>
-        /// <param name="accountCredit">Credit account</param>
-        /// <param name="accountDebit">Debit account</param>
-        /// <returns>None or throws Sql exceptionn </returns>
-        public async Task UpdateBalancePair(Account accountCredit, Account accountDebit)
+        /// <param name="accountNumCredit">Credit account number</param>
+        /// <param name="accountNumDebit">Debit account number</param>
+        /// <param name="amount">Transfer amount</param>
+        /// <returns>Pair of updated records if balance is allowed or empty collection otherwise </returns>
+        public async Task<IEnumerable<Account>> TransferAsync(string accountNumCredit, string accountNumDebit, decimal amount)
         {
+            var sql = @"UPDATE [dbo].[AccountTable]
+                        SET Balance = 
+                        (
+                            CASE 
+                                WHEN AccountNum = @AccountNumDt THEN Balance - @Amount
+                                WHEN AccountNum = @AccountNumCt THEN Balance + @Amount
+                            END
+                        )
+                        OUTPUT inserted.*
+                        WHERE 
+                        AccountNum IN (@AccountNumDt, @AccountNumCt)
+                        AND
+                        EXISTS (
+                                SELECT DtBalance FROM 
+                                    (
+                                        SELECT (Balance - @Amount) AS DtBalance FROM AccountTable 
+                                        WHERE AccountNum = @AccountNumDt
+                                    )   AS DtAccountTable 
+                                WHERE DtBalance >= 0
+                               )";
+
             var parms = new
             {
-                nvc_AccountCredit = accountCredit.AccountNum,
-                dcml_BalanceCredit = accountCredit.Balance,
-                nvc_AccountDebit = accountDebit.AccountNum,
-                dcml_BalanceDebit = accountDebit.Balance
+                AccountNumDt = accountNumDebit,
+                AccountNumCt = accountNumCredit,
+                Amount = amount
             };
 
-            await _connection.ExecuteAsync("UpdateBalancePair", param: parms, transaction: _transaction, commandType: CommandType.StoredProcedure);
+            return await _connection.QueryAsync<Account>(sql: sql, param: parms, transaction: _transaction);
         }
     }
 }

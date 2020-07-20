@@ -16,7 +16,7 @@
     /// <summary>
     /// Handles commands which modify account state
     /// </summary>
-     public class AccountCommandHandler :
+    public class AccountCommandHandler :
         IRequestHandler<CreateAccountCommand, ExecutionResult<Account>>,
         IRequestHandler<FundTransferCommand, ExecutionResult<FundTransferResponse>>
     {
@@ -84,88 +84,56 @@
             bool transferResult = false;
             Account debitAccount = null;
             Account creditAccount = null;
-            FundTransferResponse response;
+            ExecutionResult<FundTransferResponse> response;
 
-            try
+            using var connection = await _dbConnectionFactory.CreateConnectionAsync();
+            var repository = new AccountRepository(connection);
+                
+            if (IsTransferAllowed(request))
             {
-                using (var connection = await _dbConnectionFactory.CreateConnectionAsync())
+                var updatedAccounts = await repository.TransferAsync(request.AccountNumCredit, request.AccountNumDebit, request.Amount);
+
+                foreach (var item in updatedAccounts)
                 {
-                    using var transaction = connection.BeginTransaction(IsolationLevel.Snapshot);
-
-                    var repository = new AccountRepository(connection, transaction);
-
-                    debitAccount = await repository.ReadById(request.AccountNumDebit);
-                    creditAccount = await repository.ReadById(request.AccountNumCredit);
-
-                    if (debitAccount != null && creditAccount != null)
-                    {
-                        var transferAmount = request.Amount;
-
-                        if (IsTransferAllowed(debitAccount, creditAccount, transferAmount))
-                        {
-                            debitAccount.Balance = CalcBalanceDebit(debitAccount, transferAmount);
-                            creditAccount.Balance = CalcBalnceCredit(creditAccount, transferAmount);
-
-                            await repository.UpdateBalancePair(creditAccount, debitAccount);
-
-                            transferResult = true;
-                        }
-                    }
+                    if (item.AccountNum == request.AccountNumDebit)
+                        debitAccount = item;
                     else
-                    {
-                        return new ExecutionResult<FundTransferResponse>(new AccountNotExistDescription("One of the accounts not exist"));
-                    }
-                    
-                    transaction.Commit();
-                }
+                        creditAccount = item;
 
-                response = new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
-                                                    debitAccount.AccountNum, debitAccount.Balance,
-                                                    transferResult);
+                    transferResult = true;
+                }
             }
-            catch (SqlException ex)
+
+            if (transferResult == false)
             {
-                if (IsConcurencySnapshotUpdateException(ex))
-                {
-                    return new ExecutionResult<FundTransferResponse>(new AccountIsLockedForUpdate());
-                }
-                else
-                {
-                    throw;
-                }
+                debitAccount = await repository.ReadById(request.AccountNumDebit);
+                creditAccount = await repository.ReadById(request.AccountNumCredit);
             }
 
-            return new ExecutionResult<FundTransferResponse>(response);
+            if (debitAccount == null || creditAccount == null)
+            {
+                response = new ExecutionResult<FundTransferResponse>(new AccountNotExistDescription("One of the accounts is not exist"));
+            }
+            else
+            {
+                response = new ExecutionResult<FundTransferResponse>(
+                    new FundTransferResponse(creditAccount.AccountNum, creditAccount.Balance,
+                                              debitAccount.AccountNum, debitAccount.Balance,
+                                              transferResult));
+            }
+
+            return response;
         }
 
-        private bool IsConcurencySnapshotUpdateException(SqlException exeption)
+        private bool IsTransferAllowed(FundTransferCommand request)
         {
-            // The SQL server error codes
-            return exeption.Number == 3960 && exeption.State == 5;
-        }
-
-        private bool IsTransferAllowed(Account accountDebit, Account accountCredit, decimal transferAmount)
-        {
-            if (accountCredit.AccountNum == accountDebit.AccountNum)
+            if (request.AccountNumCredit == request.AccountNumDebit)
                 return false;
 
-            if (transferAmount == decimal.Zero)
-                return false;
-
-            if (CalcBalanceDebit(accountDebit, transferAmount) < 0)
+            if (request.Amount == decimal.Zero)
                 return false;
 
             return true;
-        }
-
-        private decimal CalcBalanceDebit(Account account, decimal transferAmount)
-        {
-            return account.Balance - transferAmount;
-        }
-
-        private decimal CalcBalnceCredit(Account account, decimal transferAmount)
-        {
-            return account.Balance + transferAmount;
         }
     }
 }
